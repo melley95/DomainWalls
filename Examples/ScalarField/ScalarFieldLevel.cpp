@@ -18,16 +18,16 @@
 #include "NewMatterConstraints.hpp"
 
 // For tag cells
-#include "FixedGridsTaggingCriterion.hpp"
+#include "PhiAndKTaggingCriterion.hpp"
 
 // Problem specific includes
 #include "ComputePack.hpp"
 #include "GammaCalculator.hpp"
-#include "InitialScalarData.hpp"
-#include "KerrBH.hpp"
+#include "Sphere.hpp"
 #include "Potential.hpp"
 #include "ScalarField.hpp"
 #include "SetValue.hpp"
+#include "Flat.hpp"
 
 // Things to do at each advance step, after the RK4 is calculated
 void ScalarFieldLevel::specificAdvance()
@@ -55,8 +55,8 @@ void ScalarFieldLevel::initialData()
     // First set everything to zero then initial conditions for scalar field -
     // here a Kerr BH and a scalar field profile
     BoxLoops::loop(
-        make_compute_pack(SetValue(0.), KerrBH(m_p.kerr_params, m_dx),
-                          InitialScalarData(m_p.initial_params, m_dx)),
+        make_compute_pack(SetValue(0.), Flat(),
+                          Sphere(m_p.initial_params, m_dx)),
         m_state_new, m_state_new, INCLUDE_GHOST_CELLS);
 
     fillAllGhosts();
@@ -69,7 +69,7 @@ void ScalarFieldLevel::initialData()
 void ScalarFieldLevel::prePlotLevel()
 {
     fillAllGhosts();
-    Potential potential(m_p.potential_params);
+    Potential potential(m_p.pot_params);
     ScalarFieldWithPotential scalar_field(potential);
     BoxLoops::loop(
         MatterConstraints<ScalarFieldWithPotential>(
@@ -89,7 +89,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
         a_soln, a_soln, INCLUDE_GHOST_CELLS);
 
     // Calculate MatterCCZ4 right hand side with matter_t = ScalarField
-    Potential potential(m_p.potential_params);
+    Potential potential(m_p.pot_params);
     ScalarFieldWithPotential scalar_field(potential);
     if (m_p.max_spatial_derivative_order == 4)
     {
@@ -119,8 +119,8 @@ void ScalarFieldLevel::specificUpdateODE(GRLevelData &a_soln,
 
 void ScalarFieldLevel::preTagCells()
 {
-    // we don't need any ghosts filled for the fixed grids tagging criterion
-    // used here so don't fill any
+    fillAllGhosts(VariableType::evolution, Interval(c_phi, c_phi));
+    fillAllGhosts(VariableType::evolution, Interval(c_K, c_K));
 }
 
 void ScalarFieldLevel::computeTaggingCriterion(
@@ -128,13 +128,10 @@ void ScalarFieldLevel::computeTaggingCriterion(
     const FArrayBox &current_state_diagnostics)
 {
     BoxLoops::loop(
-        FixedGridsTaggingCriterion(m_dx, m_level, 2.0 * m_p.L, m_p.center),
+        PhiAndKTaggingCriterion(m_dx, m_p.threshold_phi, m_p.threshold_K),
         current_state, tagging_criterion);
 }
 void ScalarFieldLevel::specificPostTimeStep()
 {
-#ifdef USE_AHFINDER
-    if (m_p.AH_activate && m_level == m_p.AH_params.level_to_run)
-        m_bh_amr.m_ah_finder.solve(m_dt, m_time, m_restart_time);
-#endif
+
 }
