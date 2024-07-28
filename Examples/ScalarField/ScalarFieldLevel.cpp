@@ -23,7 +23,7 @@
 // Problem specific includes
 #include "ComputePack.hpp"
 #include "GammaCalculator.hpp"
-#include "Sphere.hpp"
+#include "Spheroid.hpp"
 #include "Potential.hpp"
 #include "ScalarField.hpp"
 #include "SetValue.hpp"
@@ -56,7 +56,7 @@ void ScalarFieldLevel::initialData()
     // here a Kerr BH and a scalar field profile
     BoxLoops::loop(
         make_compute_pack(SetValue(0.), Flat(),
-                          Sphere(m_p.initial_params, m_dx)),
+                          Spheroid(m_p.initial_params, m_dx)),
         m_state_new, m_state_new, INCLUDE_GHOST_CELLS);
 
     fillAllGhosts();

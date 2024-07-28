@@ -60,6 +60,18 @@ void MatterConstraints<matter_t>::compute(Cell<data_t> current_cell) const
     }
     // Write the constraints into the output FArrayBox
     store_vars(out, current_cell);
+
+
+
+    out.rho_grad = 0.0;
+    FOR(i, j)
+    {
+        out.rho_grad += 0.5 * vars.chi * h_UU[i][j] * d1.phi[i] * d1.phi[j];
+    }
+
+    out.rho_kin = 0.5 * vars.Pi * vars.Pi;
+
+    out.rho_pot = emtensor.rho - out.rho_grad - out.rho_kin;
 }
 
 #endif /* NEWMATTERCONSTRAINTS_IMPL_HPP_ */

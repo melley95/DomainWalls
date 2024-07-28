@@ -11,7 +11,7 @@
 #include "SimulationParametersBase.hpp"
 
 // Problem specific includes:
-#include "Sphere.hpp"
+#include "Spheroid.hpp"
 //#include "KerrBH.hpp"
 #include "Potential.hpp"
 #include "PhiAndKTaggingCriterion.hpp"
@@ -38,6 +38,10 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("sf_eta", initial_params.eta, 0.0);
         pp.load("sf_lambda", initial_params.lambda, 0.0);
 
+        pp.load("a0", initial_params.a, 1.0);
+        pp.load("b0", initial_params.b, 1.0);
+        pp.load("c0", initial_params.c, 1.0);
+
         pot_params.eta = initial_params.eta;
         pot_params.lambda = initial_params.lambda;
 
@@ -57,7 +61,7 @@ class SimulationParameters : public SimulationParametersBase
     // Initial data for matter and potential and BH
     double G_Newton;
     Potential::params_t pot_params;
-    Sphere::params_t initial_params;
+    Spheroid::params_t initial_params;
     
     double threshold_phi;
     double threshold_K; 

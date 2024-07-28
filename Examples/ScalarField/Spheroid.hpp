@@ -3,8 +3,8 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#ifndef SPHERE_HPP_
-#define SPHERE_HPP_
+#ifndef SPHEROID_HPP_
+#define SPHEROID_HPP_
 
 #include "Cell.hpp"
 #include "Coordinates.hpp"
@@ -16,7 +16,7 @@
 #include "simd.hpp"
 
 
-class Sphere
+class Spheroid
 {
   public:
     //! A structure for the input params for scalar field properties and initial
@@ -30,10 +30,14 @@ class Sphere
         double lambda;
         double R0;
 
+        double a;
+        double b;
+        double c;
+
     };
 
     //! The constructor
-    Sphere(params_t a_params, double a_dx): m_dx(a_dx), m_params(a_params){}
+    Spheroid(params_t a_params, double a_dx): m_dx(a_dx), m_params(a_params){}
 
     //! Function to compute the value of all the initial vars on the grid
     template <class data_t> void compute(Cell<data_t> current_cell) const
@@ -57,10 +61,12 @@ class Sphere
     template <class data_t>
     data_t compute_phi(Coordinates<data_t> coords) const
 {
+    
+    
     data_t x = coords.x;
     data_t y = coords.y;
     data_t z = coords.z;
-    data_t rho = sqrt(x*x+y*y+z*z);
+    data_t rho = sqrt((m_params.a*m_params.a)*x*x+(m_params.b*m_params.b)*y*y+(m_params.c*m_params.c)*z*z);
     data_t out_phi = m_params.eta*tanh(sqrt(2.0*m_params.lambda)*m_params.eta*(rho-m_params.R0)/2.0);
 
     return out_phi;
@@ -74,4 +80,4 @@ class Sphere
 
 
 
-#endif /* SPHERE_HPP_ */
+#endif /* SPHEROID_HPP_ */
