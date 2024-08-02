@@ -17,7 +17,7 @@ Real my_phi_function(const RealVect loc, const PoissonParameters &a_params,
     Real zz = loc[2];
     
     
-    Real rho = sqrt(xx*xx+yy*yy+zz*zz);
+    Real rho = sqrt(a_params.a0*a_params.a0*xx*xx+a_params.b0*a_params.b0*yy*yy+a_params.c0*a_params.c0*zz*zz);
 
 
     

@@ -15,6 +15,8 @@ enum
     c_rho_kin,
     c_rho_pot,
 
+    c_energy_flux,
+
     c_Mom,
 
 
@@ -28,6 +30,8 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
     "Ham",
 
     "rho_grad", "rho_kin", "rho_pot",
+
+    "energy_flux",
 
     "Mom"};
 }

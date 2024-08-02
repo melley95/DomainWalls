@@ -93,6 +93,9 @@ class PoissonParameters
     Real lambda;
     Real eta;
     Real R0;
+    Real a0;
+    Real b0;
+    Real c0;
 };
 
 /// get stuff from input file

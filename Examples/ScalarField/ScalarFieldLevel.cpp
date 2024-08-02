@@ -29,6 +29,9 @@
 #include "SetValue.hpp"
 #include "Flat.hpp"
 
+#include "MatterEnergyFlux.hpp"
+#include "MatterEnergyFluxExtraction.hpp"
+
 // Things to do at each advance step, after the RK4 is calculated
 void ScalarFieldLevel::specificAdvance()
 {
@@ -133,5 +136,44 @@ void ScalarFieldLevel::computeTaggingCriterion(
 }
 void ScalarFieldLevel::specificPostTimeStep()
 {
+
+    bool first_step = (m_time == 0.);
+
+    int min_level = 0;
+
+    bool calculate_diagnostics = at_level_timestep_multiple(min_level);
+    if (calculate_diagnostics)
+    {
+
+    fillAllGhosts();
+    Potential potential(m_p.pot_params);
+    ScalarFieldWithPotential scalar_field(potential);
+    BoxLoops::loop(
+        MatterConstraints<ScalarFieldWithPotential>(
+            scalar_field, m_dx, m_p.G_Newton, c_Ham, Interval(c_Mom, c_Mom)),
+        m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+
+
+      if (m_p.activate_extraction)
+    {
+     
+        BoxLoops::loop(MatterEnergyFlux<ScalarFieldWithPotential>(
+                           scalar_field, m_p.extraction_params.center, m_dx,
+                           c_energy_flux),
+                       m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+
+        // ignore extraction level param for now since tagging criterion does
+        // not enforce it
+        if (m_level == 0)
+        {
+            bool first_step = (m_dt == m_time);
+            MatterEnergyFluxExtraction energy_flux_extraction(
+                m_p.extraction_params, m_dt, m_time, first_step, m_restart_time,
+                c_energy_flux);
+            m_gr_amr.m_interpolator->refresh();
+            energy_flux_extraction.execute_query(m_gr_amr.m_interpolator);
+        }
+    }
+    }
 
 }

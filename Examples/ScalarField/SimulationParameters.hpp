@@ -48,6 +48,8 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("thresh_phi", threshold_phi, 0.0);
         pp.load("thresh_K", threshold_K, 0.0);
 
+        pp.load("activate_extraction", activate_extraction, false);
+
 
 
 
@@ -65,6 +67,8 @@ class SimulationParameters : public SimulationParametersBase
     
     double threshold_phi;
     double threshold_K; 
+
+    bool activate_extraction;
   //  PhiAndKTaggingCriterion::params_t tag_crit;
 
 
