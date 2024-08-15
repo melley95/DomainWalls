@@ -29,6 +29,9 @@ class MovingPunctureGauge
                                  //!\alpha^p(K-2\Theta)\f$
         double lapse_coeff = 2.; //!< The coefficient c in \f$\partial_t \alpha
                                  //!= -c \alpha^p(K-2\Theta)\f$
+
+        double exp_lapse_coeff = 0.0;
+
         // shift params:
         double shift_Gamma_coeff = 0.75; //!< Gives the F in \f$\partial_t
                                          //!  \beta^i =  F B^i\f$
@@ -36,6 +39,8 @@ class MovingPunctureGauge
                                          //! shift condition on/off
         double eta = 1.; //!< The eta in \f$\partial_t B^i = \partial_t \tilde
                          //!\Gamma - \eta B^i\f$
+
+                      
     };
 
   protected:
@@ -53,7 +58,7 @@ class MovingPunctureGauge
     {
         rhs.lapse = m_params.lapse_advec_coeff * advec.lapse -
                     m_params.lapse_coeff *
-                        pow(vars.lapse, m_params.lapse_power) *
+                        pow(vars.lapse, m_params.lapse_power) *  exp(- m_params.exp_lapse_coeff*vars.lapse )*
                         (vars.K - 2 * vars.Theta);
         FOR(i)
         {

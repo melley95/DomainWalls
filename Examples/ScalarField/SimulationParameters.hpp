@@ -50,6 +50,10 @@ class SimulationParameters : public SimulationParametersBase
 
         pp.load("activate_extraction", activate_extraction, false);
 
+        #ifdef USE_AHFINDER
+        pp.load("AH_initial_guess", AH_initial_guess, 0.5);
+        #endif
+
 
 
 
@@ -70,6 +74,10 @@ class SimulationParameters : public SimulationParametersBase
 
     bool activate_extraction;
   //  PhiAndKTaggingCriterion::params_t tag_crit;
+
+    #ifdef USE_AHFINDER
+    double AH_initial_guess;
+    #endif
 
 
 

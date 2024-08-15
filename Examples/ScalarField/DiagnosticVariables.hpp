@@ -17,6 +17,9 @@ enum
 
     c_energy_flux,
 
+    c_dxphi,
+    c_Pi_out,
+
     c_Mom,
 
 
@@ -32,6 +35,8 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
     "rho_grad", "rho_kin", "rho_pot",
 
     "energy_flux",
+
+    "dxphi", "Pi",
 
     "Mom"};
 }

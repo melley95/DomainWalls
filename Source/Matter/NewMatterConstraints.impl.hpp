@@ -73,6 +73,10 @@ void MatterConstraints<matter_t>::compute(Cell<data_t> current_cell) const
 
     out.rho_pot = emtensor.rho - out.rho_grad - out.rho_kin;
 
+    out.dxphi = d1.phi[0];
+
+    out.Pi_out = vars.Pi;  
+
     store_vars(out, current_cell);
 }
 

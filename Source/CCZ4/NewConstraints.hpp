@@ -40,6 +40,10 @@ class Constraints
         data_t rho_grad;
         data_t rho_kin;
         data_t rho_pot;
+
+        data_t dxphi;
+
+        data_t Pi_out;
     };
 
     // Constructor which allows specifying Ham and Mom vars

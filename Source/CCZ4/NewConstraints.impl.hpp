@@ -147,6 +147,11 @@ void Constraints::store_vars(Vars<data_t> &out,
     current_cell.store_vars(out.rho_grad, c_rho_grad);
     current_cell.store_vars(out.rho_kin, c_rho_kin);
     current_cell.store_vars(out.rho_pot, c_rho_pot);
+
+    current_cell.store_vars(out.dxphi, c_dxphi);
+    current_cell.store_vars(out.Pi_out, c_Pi_out);
+
+
 }
 
 #endif /* NEWCONSTRAINTS_IMPL_HPP_ */

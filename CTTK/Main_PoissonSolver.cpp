@@ -439,7 +439,7 @@ int poissonSolve(const Vector<DisjointBoxLayout> &a_grids,
         }
 
         // output the data after the solver acts to check updates
-        output_solver_data(dpsi, error, multigrid_vars, a_grids, a_params,
+        output_solver_data(dpsi, error, multigrid_vars, a_grids, a_params,   //ME: removed
                            NL_iter + 1);
 
     } // end NL iteration loop
