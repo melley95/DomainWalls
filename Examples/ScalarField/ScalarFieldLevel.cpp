@@ -18,7 +18,7 @@
 #include "NewMatterConstraints.hpp"
 
 // For tag cells
-#include "PhiAndKTaggingCriterion.hpp"
+#include "PhiAndKExtractionTaggingCriterion.hpp"
 
 // Problem specific includes
 #include "ComputePack.hpp"
@@ -131,7 +131,7 @@ void ScalarFieldLevel::computeTaggingCriterion(
     const FArrayBox &current_state_diagnostics)
 {
     BoxLoops::loop(
-        PhiAndKTaggingCriterion(m_dx, m_p.threshold_phi, m_p.threshold_K),
+        PhiAndKExtractionTaggingCriterion(m_dx, m_p.threshold_phi, m_p.threshold_K, m_level, m_p.extraction_params, m_p.activate_extraction),
         current_state, tagging_criterion);
 }
 void ScalarFieldLevel::specificPostTimeStep()

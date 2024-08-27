@@ -14,7 +14,7 @@
 #include "Spheroid.hpp"
 //#include "KerrBH.hpp"
 #include "Potential.hpp"
-#include "PhiAndKTaggingCriterion.hpp"
+#include "PhiAndKExtractionTaggingCriterion.hpp"
 
 class SimulationParameters : public SimulationParametersBase
 {

@@ -82,7 +82,8 @@ data_t MatterEnergyFlux<matter_t>::compute_energy_flux(
     // divide by r^2 sin(theta) as this will be included by the
     // SphericalExtraction integration
     
-    data_t r2sintheta = coords.get_radius() * abs(coords.z);
+    data_t rho2 = simd_max(coords.x * coords.x + coords.y * coords.y, 1e-12);
+    data_t r2sintheta = coords.get_radius() * sqrt(rho2);
     area_element /= r2sintheta;
 
     // the r component of the unit normal (lowered index) to the spheres.
@@ -92,7 +93,7 @@ data_t MatterEnergyFlux<matter_t>::compute_energy_flux(
         TensorAlgebra::compute_inverse_sym(h_phys_spher);
     data_t spherical_normal_r = 1.0 / sqrt(h_phys_spher_UU[0][0]);
 
-    return spherical_normal_r * flux_vector_spher_U_r; // * area_element
+    return spherical_normal_r * flux_vector_spher_U_r * area_element;
 }
 
 #endif /* MATTERENERGYFLUX__IMPL_HPP */
