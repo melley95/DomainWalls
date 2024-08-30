@@ -10,17 +10,28 @@
 enum
 {
     c_Ham,
+    c_Ham_abs_sum,
+    c_Mom,
+  
+
+
 
     c_rho_grad,
     c_rho_kin,
     c_rho_pot,
 
-    c_energy_flux,
+
 
     c_dxphi,
     c_Pi_out,
 
-    c_Mom,
+    c_rhoLL, // the Landau Lifshitz rho
+    c_source,
+    c_flux,
+
+
+
+
 
 
 
@@ -30,15 +41,13 @@ enum
 namespace DiagnosticVariables
 {
 static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
-    "Ham",
+    "Ham", "Ham_abs_sum", "Mom", 
 
     "rho_grad", "rho_kin", "rho_pot",
 
-    "energy_flux",
-
     "dxphi", "Pi",
 
-    "Mom"};
+    "rhoLL",    "source",    "flux"};
 }
 
 #endif /* DIAGNOSTICVARIABLES_HPP */

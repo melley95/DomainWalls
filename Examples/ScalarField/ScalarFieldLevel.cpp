@@ -29,8 +29,10 @@
 #include "SetValue.hpp"
 #include "Flat.hpp"
 
-#include "MatterEnergyFlux.hpp"
-#include "MatterEnergyFluxExtraction.hpp"
+#include "MatterEnergy.hpp"
+#include "FluxExtraction.hpp"
+#include "AMRReductions.hpp"
+
 
 // Things to do at each advance step, after the RK4 is calculated
 void ScalarFieldLevel::specificAdvance()
@@ -137,13 +139,9 @@ void ScalarFieldLevel::computeTaggingCriterion(
 void ScalarFieldLevel::specificPostTimeStep()
 {
 
-    bool first_step = (m_time == 0.);
+    
 
-    int min_level = 0;
-
-    bool calculate_diagnostics = at_level_timestep_multiple(min_level);
-    if (calculate_diagnostics)
-    {
+    int min_level = m_p.extraction_params.min_extraction_level();
 
     fillAllGhosts();
     Potential potential(m_p.pot_params);
@@ -152,29 +150,49 @@ void ScalarFieldLevel::specificPostTimeStep()
         MatterConstraints<ScalarFieldWithPotential>(
             scalar_field, m_dx, m_p.G_Newton, c_Ham, Interval(c_Mom, c_Mom)),
         m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
-
-
-      if (m_p.activate_extraction)
-    {
-     
-        BoxLoops::loop(MatterEnergyFlux<ScalarFieldWithPotential>(
-                           scalar_field, m_p.extraction_params.center, m_dx,
-                           c_energy_flux),
+     BoxLoops::loop(MatterEnergy<ScalarFieldWithPotential>(scalar_field, m_dx, m_p.center),
                        m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 
-        // ignore extraction level param for now since tagging criterion does
-        // not enforce it
-        if (m_level == 0)
+  
+    if (m_level == min_level)
+    {
+
+        
+
+    bool first_step = (m_time == 0.0);
+
+    bool fill_ghosts = false;
+    m_bh_amr.m_interpolator->refresh(fill_ghosts);
+
+    AMRReductions<VariableType::diagnostic> amr_reductions(m_bh_amr);
+    double rho_sum = amr_reductions.sum(c_rhoLL);
+    double source_sum = amr_reductions.sum(c_source);
+    double Ham_sum = amr_reductions.norm(c_Ham);
+
+
+
+    SmallDataIO integral_file("data/VolumeIntegrals", m_dt, m_time,
+                                  m_restart_time, SmallDataIO::APPEND,
+                                  first_step);
+    // remove any duplicate data if this is post restart
+        integral_file.remove_duplicate_time_data();
+        std::vector<double> data_for_writing = {rho_sum, source_sum, Ham_sum};
+        // write data
+        if (first_step)
         {
-            bool first_step = (m_dt == m_time);
-            MatterEnergyFluxExtraction energy_flux_extraction(
-                m_p.extraction_params, m_dt, m_time, first_step, m_restart_time,
-                c_energy_flux);
-            m_gr_amr.m_interpolator->refresh();
-            energy_flux_extraction.execute_query(m_gr_amr.m_interpolator);
+            integral_file.write_header_line({"rho", "source", "Ham"});
         }
+        integral_file.write_time_data_line(data_for_writing);
+
+        // Now refresh the interpolator and do the interpolation
+        m_bh_amr.fill_multilevel_ghosts(VariableType::diagnostic,
+                                        Interval(c_flux, c_flux));
+        FluxExtraction flux_extraction(m_p.extraction_params, m_dt, m_time,
+                                       m_restart_time, first_step);
+        flux_extraction.execute_query(m_bh_amr.m_interpolator);
     }
-    }
+    
+    
 
     #ifdef USE_AHFINDER
     // if print is on and there are Diagnostics to write, calculate them!

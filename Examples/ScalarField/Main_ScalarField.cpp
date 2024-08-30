@@ -22,6 +22,8 @@
 // Chombo namespace
 #include "UsingNamespace.H"
 
+#include "MultiLevelTask.hpp"
+
 int runGRChombo(int argc, char *argv[])
 {
     // Load the parameter file and construct the SimulationParameter class
@@ -57,6 +59,19 @@ int runGRChombo(int argc, char *argv[])
     }
 #endif
 
+    
+    
+    // Add a scheduler to call specificPostTimeStep on every AMRLevel at t=0
+    auto task = [](GRAMRLevel *level)
+    {
+        if (level->time() == 0.)
+            level->specificPostTimeStep();
+    };
+    // call 'now' really now
+    MultiLevelTaskPtr<> call_task(task);
+    call_task.execute(bh_amr);
+    
+    
     using Clock = std::chrono::steady_clock;
     using Minutes = std::chrono::duration<double, std::ratio<60, 1>>;
 
