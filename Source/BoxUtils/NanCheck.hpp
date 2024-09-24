@@ -37,18 +37,23 @@ class NanCheck
 
     void compute(Cell<double> current_cell) const
     {
-        bool stop = false;
+        bool stop;
+        // guard update to prevent a race
+#pragma omp atomic write
+        stop = false;
         int num_vars = current_cell.get_num_in_vars();
         for (int ivar = 0; ivar < num_vars; ++ivar)
         {
             double val;
             current_cell.load_vars(val, ivar);
             if (std::isnan(val) || abs(val) > m_max_abs)
+            // we want to exit if any of the threads find a nan
+#pragma omp atomic write
                 stop = true;
         }
         if (stop)
         {
-#pragma omp single
+#pragma omp master
             {
                 pout() << m_error_info
                        << "::Values have become nan. The current state is: \n";

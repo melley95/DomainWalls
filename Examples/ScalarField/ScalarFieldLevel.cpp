@@ -32,6 +32,8 @@
 #include "MatterEnergy.hpp"
 #include "FluxExtraction.hpp"
 #include "AMRReductions.hpp"
+#include "ExcisionDiagnostics.hpp"
+
 
 
 // Things to do at each advance step, after the RK4 is calculated
@@ -142,7 +144,10 @@ void ScalarFieldLevel::specificPostTimeStep()
     
 
     int min_level = m_p.extraction_params.min_extraction_level();
+    bool first_step = (m_time == 0.0);
+    bool fill_ghosts = false;
 
+    
     fillAllGhosts();
     Potential potential(m_p.pot_params);
     ScalarFieldWithPotential scalar_field(potential);
@@ -153,15 +158,21 @@ void ScalarFieldLevel::specificPostTimeStep()
      BoxLoops::loop(MatterEnergy<ScalarFieldWithPotential>(scalar_field, m_dx, m_p.center),
                        m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 
+   
+
+    // Remove diagnostics of volume outside extraction regions -- TODO: multiple volumes
+
+ 
+    BoxLoops::loop(
+        ExcisionDiagnostics(m_dx, m_p.center, 0.0, 
+                            m_p.extraction_params.extraction_radii[0]), //m_p.extraction_params.extraction_radii.size() -1 - i
+        m_state_diagnostics, m_state_diagnostics, SKIP_GHOST_CELLS,
+        disable_simd());
+
   
     if (m_level == min_level)
     {
-
-        
-
-    bool first_step = (m_time == 0.0);
-
-    bool fill_ghosts = false;
+  
     m_bh_amr.m_interpolator->refresh(fill_ghosts);
 
     AMRReductions<VariableType::diagnostic> amr_reductions(m_bh_amr);
@@ -171,7 +182,7 @@ void ScalarFieldLevel::specificPostTimeStep()
 
 
 
-    SmallDataIO integral_file("data/VolumeIntegrals", m_dt, m_time,
+    SmallDataIO integral_file("data/VolumeIntegrals_r"+std::to_string((int)m_p.extraction_params.extraction_radii[0]), m_dt, m_time,
                                   m_restart_time, SmallDataIO::APPEND,
                                   first_step);
     // remove any duplicate data if this is post restart
@@ -184,14 +195,16 @@ void ScalarFieldLevel::specificPostTimeStep()
         }
         integral_file.write_time_data_line(data_for_writing);
 
-        // Now refresh the interpolator and do the interpolation
+
+  
+    // Now refresh the interpolator and do the interpolation
+      //  m_bh_amr.m_interpolator->refresh(fill_ghosts);
         m_bh_amr.fill_multilevel_ghosts(VariableType::diagnostic,
                                         Interval(c_flux, c_flux));
         FluxExtraction flux_extraction(m_p.extraction_params, m_dt, m_time,
-                                       m_restart_time, first_step);
+                                       first_step, m_restart_time);
         flux_extraction.execute_query(m_bh_amr.m_interpolator);
     }
-    
     
 
     #ifdef USE_AHFINDER
