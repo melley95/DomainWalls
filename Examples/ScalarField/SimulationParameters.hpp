@@ -34,14 +34,13 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("G_Newton", G_Newton,
                 0.0); // for now the example neglects backreaction
       
-        pp.load("R0", initial_params.R0, 0.0);
+        pp.load("R0", initial_params.R0, 10.0);
         pp.load("sf_eta", initial_params.eta, 0.0);
         pp.load("sf_lambda", initial_params.lambda, 0.0);
 
-        pp.load("a0", initial_params.a, 1.0);
-        pp.load("b0", initial_params.b, 1.0);
-        pp.load("c0", initial_params.c, 1.0);
-
+        pp.load("eps1", initial_params.eps1, 1.0);
+        pp.load("eps2", initial_params.eps2, 1.0);
+        
         pot_params.eta = initial_params.eta;
         pot_params.lambda = initial_params.lambda;
 
