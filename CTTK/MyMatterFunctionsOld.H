@@ -15,23 +15,13 @@ Real my_phi_function(const RealVect loc, const PoissonParameters &a_params,
     Real xx = loc[0];
     Real yy = loc[1];
     Real zz = loc[2];
-
-    Real rho2 = std::max(xx*xx + yy*yy + zz*zz,1e-12);
-    Real r2 = std::max(xx*xx + yy*yy, 1e-12);
-
-    Real cos2phi = xx*xx/r2;
-    Real sin2phi = yy*yy/r2;
-    Real sin2theta = r2/ rho2;
-    Real cos2theta = zz*zz / rho2;
-
-    Real RR = a_params.R0/sqrt((cos2phi+pow(a_params.eps1, -2)*sin2phi)*sin2theta+pow(a_params.eps2,-2)*cos2theta);
     
     
-    Real out_phi = a_params.eta*tanh(sqrt(2.0*a_params.lambda)*a_params.eta*(sqrt(rho2)-RR)/2.0);
+    Real rho = sqrt(a_params.a0*a_params.a0*xx*xx+a_params.b0*a_params.b0*yy*yy+a_params.c0*a_params.c0*zz*zz);
 
 
     
-    return out_phi;
+    return a_params.eta*tanh(sqrt(2.0*a_params.lambda)*a_params.eta*(rho-a_params.R0)/2.0);
    
    
    

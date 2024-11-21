@@ -5,6 +5,8 @@ ifndef CHOMBO_HOME
     $(error Please define CHOMBO_HOME - see installation instructions.)
 endif
 
+DIM = 2
+
 # trace the chain of included makefiles
 makefiles += releasedExamples_AMRPoisson_execVariableCoefficient
 

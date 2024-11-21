@@ -33,6 +33,8 @@
 #include "FluxExtraction.hpp"
 #include "AMRReductions.hpp"
 #include "ExcisionDiagnostics.hpp"
+#include "MovingPunctureGaugeSA.hpp"
+
 
 
 
@@ -100,7 +102,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
     ScalarFieldWithPotential scalar_field(potential);
     if (m_p.max_spatial_derivative_order == 4)
     {
-        MatterCCZ4RHS<ScalarFieldWithPotential, MovingPunctureGauge,
+        MatterCCZ4RHS<ScalarFieldWithPotential, MovingPunctureGaugeSA,
                       FourthOrderDerivatives>
             my_ccz4_matter(scalar_field, m_p.ccz4_params, m_dx, m_p.sigma,
                            m_p.formulation, m_p.G_Newton);
@@ -108,7 +110,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
     }
     else if (m_p.max_spatial_derivative_order == 6)
     {
-        MatterCCZ4RHS<ScalarFieldWithPotential, MovingPunctureGauge,
+        MatterCCZ4RHS<ScalarFieldWithPotential, MovingPunctureGaugeSA,
                       SixthOrderDerivatives>
             my_ccz4_matter(scalar_field, m_p.ccz4_params, m_dx, m_p.sigma,
                            m_p.formulation, m_p.G_Newton);

@@ -81,9 +81,9 @@ void getPoissonParameters(PoissonParameters &a_params)
     pp.get("sf_eta", a_params.eta);
     pp.get("sf_lambda", a_params.lambda);
     pp.get("R0", a_params.R0);
-    pp.get("a0", a_params.a0);
-    pp.get("b0", a_params.b0);
-    pp.get("c0", a_params.c0);
+    pp.get("eps1", a_params.eps1);
+    pp.get("eps2", a_params.eps2);
+
 
     // Potential parameters
   //  pp.get("pot_mass", a_params.pot_mass);

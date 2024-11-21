@@ -17,6 +17,7 @@
 #include "SetBCs.H"
 #include "VariableCoeffPoissonOperator.H"
 
+#include "NamespaceHeader.H"
 // function to define operator factory
 extern AMRLevelOpFactory<LevelData<FArrayBox>> *
 defineOperatorFactory(const Vector<DisjointBoxLayout> &a_grids,
@@ -110,4 +111,6 @@ class VariableCoeffPoissonOperatorFactory
     Vector<CFRegion> m_cfregion;
 };
 
+
+#include "NamespaceFooter.H"
 #endif
