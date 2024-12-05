@@ -53,6 +53,10 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("AH_initial_guess", AH_initial_guess, 0.5);
         #endif
 
+        pp.load("calculate_weyl", calc_weyl, false);
+
+        pp.load("constraint_norms", calculate_constraint_norms, false);
+
 
 
 
@@ -71,7 +75,9 @@ class SimulationParameters : public SimulationParametersBase
     double threshold_phi;
     double threshold_K; 
 
-    bool activate_extraction;
+    bool activate_extraction , calc_weyl, calculate_constraint_norms;
+
+
   //  PhiAndKTaggingCriterion::params_t tag_crit;
 
     #ifdef USE_AHFINDER

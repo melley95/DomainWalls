@@ -10,8 +10,10 @@
 enum
 {
     c_Ham,
-    c_Ham_abs_sum,
-    c_Mom,
+
+    c_Mom1,
+    c_Mom2,
+    c_Mom3,
   
 
 
@@ -29,6 +31,9 @@ enum
     c_source,
     c_flux,
 
+    c_Weyl4_Re,
+    c_Weyl4_Im,
+
 
 
 
@@ -41,13 +46,17 @@ enum
 namespace DiagnosticVariables
 {
 static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
-    "Ham", "Ham_abs_sum", "Mom", 
+    "Ham",
+
+    "Mom1",     "Mom2",    "Mom3", 
 
     "rho_grad", "rho_kin", "rho_pot",
 
     "dxphi", "Pi",
 
-    "rhoLL",    "source",    "flux"};
+    "rhoLL",    "source",    "flux",
+
+    "Weyl4_Re", "Weyl4_Im"};
 }
 
 #endif /* DIAGNOSTICVARIABLES_HPP */

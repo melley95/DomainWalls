@@ -33,7 +33,13 @@
 #include "FluxExtraction.hpp"
 #include "AMRReductions.hpp"
 #include "ExcisionDiagnostics.hpp"
-#include "MovingPunctureGaugeSA.hpp"
+#include "MovingPunctureGauge.hpp"
+
+#include "ScalarExtraction.hpp"
+
+
+#include "Weyl4.hpp"
+#include "WeylExtraction.hpp"
 
 
 
@@ -82,8 +88,17 @@ void ScalarFieldLevel::prePlotLevel()
     ScalarFieldWithPotential scalar_field(potential);
     BoxLoops::loop(
         MatterConstraints<ScalarFieldWithPotential>(
-            scalar_field, m_dx, m_p.G_Newton, c_Ham, Interval(c_Mom, c_Mom)),
+            scalar_field, m_dx, m_p.G_Newton, c_Ham, Interval(c_Mom1, c_Mom3)),
         m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+
+    if (m_p.activate_extraction == 1 && m_p.calc_weyl == 1)
+    {
+        BoxLoops::loop(
+            make_compute_pack(
+                Weyl4(m_p.extraction_params.center, m_dx, m_p.formulation),
+                Constraints(m_dx, c_Ham, Interval(c_Mom1, c_Mom3))),
+            m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+    }
 }
 #endif
 
@@ -102,7 +117,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
     ScalarFieldWithPotential scalar_field(potential);
     if (m_p.max_spatial_derivative_order == 4)
     {
-        MatterCCZ4RHS<ScalarFieldWithPotential, MovingPunctureGaugeSA,
+        MatterCCZ4RHS<ScalarFieldWithPotential, MovingPunctureGauge,
                       FourthOrderDerivatives>
             my_ccz4_matter(scalar_field, m_p.ccz4_params, m_dx, m_p.sigma,
                            m_p.formulation, m_p.G_Newton);
@@ -110,7 +125,7 @@ void ScalarFieldLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
     }
     else if (m_p.max_spatial_derivative_order == 6)
     {
-        MatterCCZ4RHS<ScalarFieldWithPotential, MovingPunctureGaugeSA,
+        MatterCCZ4RHS<ScalarFieldWithPotential, MovingPunctureGauge,
                       SixthOrderDerivatives>
             my_ccz4_matter(scalar_field, m_p.ccz4_params, m_dx, m_p.sigma,
                            m_p.formulation, m_p.G_Newton);
@@ -143,11 +158,17 @@ void ScalarFieldLevel::computeTaggingCriterion(
 void ScalarFieldLevel::specificPostTimeStep()
 {
 
-    
+     bool first_step = (m_time == 0.0);
 
+     if (m_p.activate_extraction == 1)
+    {
+    
     int min_level = m_p.extraction_params.min_extraction_level();
-    bool first_step = (m_time == 0.0);
     bool fill_ghosts = false;
+    bool calculate_min_level = at_level_timestep_multiple(min_level);
+
+    if (calculate_min_level){
+
 
     
     fillAllGhosts();
@@ -155,7 +176,7 @@ void ScalarFieldLevel::specificPostTimeStep()
     ScalarFieldWithPotential scalar_field(potential);
     BoxLoops::loop(
         MatterConstraints<ScalarFieldWithPotential>(
-            scalar_field, m_dx, m_p.G_Newton, c_Ham, Interval(c_Mom, c_Mom)),
+            scalar_field, m_dx, m_p.G_Newton, c_Ham, Interval(c_Mom1, c_Mom3)),
         m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
      BoxLoops::loop(MatterEnergy<ScalarFieldWithPotential>(scalar_field, m_dx, m_p.center),
                        m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
@@ -180,7 +201,7 @@ void ScalarFieldLevel::specificPostTimeStep()
     AMRReductions<VariableType::diagnostic> amr_reductions(m_bh_amr);
     double rho_sum = amr_reductions.sum(c_rhoLL);
     double source_sum = amr_reductions.sum(c_source);
-    double Ham_sum = amr_reductions.norm(c_Ham);
+
 
 
 
@@ -189,11 +210,11 @@ void ScalarFieldLevel::specificPostTimeStep()
                                   first_step);
     // remove any duplicate data if this is post restart
         integral_file.remove_duplicate_time_data();
-        std::vector<double> data_for_writing = {rho_sum, source_sum, Ham_sum};
+        std::vector<double> data_for_writing = {rho_sum, source_sum};
         // write data
         if (first_step)
         {
-            integral_file.write_header_line({"rho", "source", "Ham"});
+            integral_file.write_header_line({"rho", "source"});
         }
         integral_file.write_time_data_line(data_for_writing);
 
@@ -206,6 +227,63 @@ void ScalarFieldLevel::specificPostTimeStep()
         FluxExtraction flux_extraction(m_p.extraction_params, m_dt, m_time,
                                        first_step, m_restart_time);
         flux_extraction.execute_query(m_bh_amr.m_interpolator);
+
+        ScalarExtraction phi_extraction(
+                        m_p.extraction_params, m_dt, m_time, first_step,
+                        m_restart_time);
+        phi_extraction.execute_query(m_gr_amr.m_interpolator);
+
+    }
+
+
+     if (m_p.calc_weyl){
+            // Populate the Weyl Scalar values on the grid
+            fillAllGhosts();
+            BoxLoops::loop(
+                Weyl4(m_p.extraction_params.center, m_dx, m_p.formulation),
+                m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+
+            // Do the extraction on the min extraction level
+            if (m_level == min_level)
+            {
+                CH_TIME("WeylExtraction");
+                // Now refresh the interpolator and do the interpolation
+                // fill ghosts manually to minimise communication
+                bool fill_ghosts = false;
+                m_gr_amr.m_interpolator->refresh(fill_ghosts);
+                m_gr_amr.fill_multilevel_ghosts(
+                    VariableType::diagnostic, Interval(c_Weyl4_Re, c_Weyl4_Im),
+                    min_level);
+                WeylExtraction my_extraction(m_p.extraction_params, m_dt,
+                                             m_time, first_step,
+                                             m_restart_time);
+                my_extraction.execute_query(m_gr_amr.m_interpolator);
+            }
+     }
+    }
+
+        if (m_p.calculate_constraint_norms)
+    {
+        fillAllGhosts();
+        BoxLoops::loop(Constraints(m_dx, c_Ham, Interval(c_Mom1, c_Mom3)),
+                       m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+        if (m_level == 0)
+        {
+            AMRReductions<VariableType::diagnostic> amr_reductions(m_gr_amr);
+            double L2_Ham = amr_reductions.norm(c_Ham);
+            double L2_Mom = amr_reductions.norm(Interval(c_Mom1, c_Mom3));
+            SmallDataIO constraints_file(m_p.data_path + "constraint_norms",
+                                         m_dt, m_time, m_restart_time,
+                                         SmallDataIO::APPEND, first_step);
+            constraints_file.remove_duplicate_time_data();
+            if (first_step)
+            {
+                constraints_file.write_header_line({"L^2_Ham", "L^2_Mom"});
+            }
+            constraints_file.write_time_data_line({L2_Ham, L2_Mom});
+        }
+    }
+
     }
     
 
