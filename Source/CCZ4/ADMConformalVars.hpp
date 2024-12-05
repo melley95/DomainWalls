@@ -29,8 +29,8 @@ template <class data_t> struct VarsNoGauge
                          //!(K_{ij})^{\mathrm{TF}}\f$
 
     // Most sensible to add here rather than BSSN/CCZ4Vars
-    data_t phi;
-    data_t Pi;
+   // data_t phi;
+  //  data_t Pi;
 
     /// Defines the mapping between members of Vars and Chombo grid
     /// variables (enum in User_Variables)
@@ -41,8 +41,8 @@ template <class data_t> struct VarsNoGauge
         // Scalars
         define_enum_mapping(mapping_function, c_chi, chi);
         define_enum_mapping(mapping_function, c_K, K);
-        define_enum_mapping(mapping_function, c_phi, phi);
-        define_enum_mapping(mapping_function, c_Pi, Pi);
+   //     define_enum_mapping(mapping_function, c_phi, phi);
+    //    define_enum_mapping(mapping_function, c_Pi, Pi);
 
         // Symmetric 2-tensors
         define_symmetric_enum_mapping(
@@ -77,7 +77,7 @@ template <class data_t> struct Diff2VarsNoGauge
 {
     data_t chi;          //!< Conformal factor
     Tensor<2, data_t> h; //!< Conformal metric
-    data_t phi;
+ //   data_t phi;
 
 
     template <typename mapping_function_t>
@@ -85,7 +85,7 @@ template <class data_t> struct Diff2VarsNoGauge
     {
         using namespace VarsTools; // define_enum_mapping is part of VarsTools
         define_enum_mapping(mapping_function, c_chi, chi);
-        define_enum_mapping(mapping_function, c_phi, phi);
+   //     define_enum_mapping(mapping_function, c_phi, phi);
         define_symmetric_enum_mapping(
             mapping_function, GRInterval<c_h11, D_SELECT(, c_h22, c_h33)>(), h);
     }
