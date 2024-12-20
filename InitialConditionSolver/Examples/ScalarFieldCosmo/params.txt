@@ -1,0 +1,87 @@
+# Solver parameters
+HamMom_tolerance  = 1.0e-3  # tolerance [%] to declare convergence 
+max_NL_iterations = 100     # non linear outside loop iterations
+
+# choose the decomposition for the vecor laplacian
+# non-compact source 0, compact source 1
+method_compact = 0
+# for fully reflective or periodic, you might need to deactivate the zero mode
+deactivate_zero_mode = 1
+
+# AMR grid params - grid length and number of cells by direction
+L = 128
+N = 32 32 32
+# number of AMR refinement levels is max_level + 1
+max_level    = 0
+# Threshold for AMR refinement, based on magnitude of rhs
+refine_threshold = 0.5
+# fixed grid around some radius?
+regrid_radius = 14
+
+# min box size
+block_factor = 16
+# max box size
+max_grid_size = 16
+# how aggressively to regrid
+fill_ratio   = 0.0
+buffer_size  = 3
+
+verbosity = 2   # higher number means more verbose output
+
+# Boundary conditions for domain-boundary faces 
+# 0 for non periodic, 1 for periodic
+is_periodic = 1 1 1
+# Now set how to fill the ghosts in GRChombo outputs
+# and between NL iterations
+# 0 = extrapolating, with zero dpsi and zero gradient dVi at boundaries
+# 1 = reflective, with parity set as in UserVariables files
+hi_boundary = 0 0 0
+lo_boundary = 0 0 0
+# this order is used to fill ghosts for K and Aij, usually linear
+# and for GRChombo vars where fewer ghosts than solver
+extrapolation_order = 1
+
+# Q: "Simple, change the gravitational constant of the Universe"
+G_Newton = 1.0 
+
+# Read from hdf5 file?
+#input_filename = Outputs/SourceData_plt000001.3d.hdf5
+output_path = Outputs/
+output_filename = InitialConditionsFinal.3d.hdf5
+write_iter = 1
+error_filename = HamMom_error
+pout_path = pout/
+
+# scalar field input params
+gaussian_exists = 1 #probably remove
+phi_0 = 1e-1
+dphi = 5e-2
+pi_0 = 1e-1
+dpi = 5e-2
+scalar_mass = 1.0
+
+# in asymptotically flat space set
+# initial scale factor a0 = psi_reg**2
+psi_reg = 1.0
+# positive K means collapsing, negative expanding
+sign_of_K = -1
+
+# initial conditions for Bowen York binary BH spacetimes
+# can be with or without periodic BCs (assuming periodicity is consistent), 
+# if you don't want BHs just set masses and momenta/spins to zero
+
+bh1_bare_mass = 0.0
+# spin about each axis (this is J_i)
+bh1_spin = 0.0 0.0 0.0
+# boost in each direction (this is P_i)
+bh1_momentum = 0.0 0.0 0.0
+# offset from center in x direction
+bh1_offset = 0.0 0.0 0.0
+
+bh2_bare_mass = 0.0
+# spin about each axis (this is J_i)
+bh2_spin = 0.0 0.0 0.0
+# boost in each direction (this is P_i)
+bh2_momentum = 0.0 0.0 0.0
+# offset from center (coords x^i)
+bh2_offset = 0.0 0.0 0.0

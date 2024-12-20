@@ -1,0 +1,11 @@
+# Build files
+d
+o
+p
+f
+*.ex
+run_clang_format
+
+# Old code (used during restructuring)
+
+OldCode
