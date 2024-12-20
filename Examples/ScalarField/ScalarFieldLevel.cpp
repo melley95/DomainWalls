@@ -94,9 +94,7 @@ void ScalarFieldLevel::prePlotLevel()
     if (m_p.activate_extraction == 1 && m_p.calc_weyl == 1)
     {
         BoxLoops::loop(
-            make_compute_pack(
-                Weyl4(m_p.extraction_params.center, m_dx, m_p.formulation),
-                Constraints(m_dx, c_Ham, Interval(c_Mom1, c_Mom3))),
+                Constraints(m_dx, c_Ham, Interval(c_Mom1, c_Mom3)),
             m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
     }
 }
@@ -152,7 +150,7 @@ void ScalarFieldLevel::computeTaggingCriterion(
     const FArrayBox &current_state_diagnostics)
 {
     BoxLoops::loop(
-        PhiAndKExtractionTaggingCriterion(m_dx, m_p.threshold_phi, m_p.threshold_K, m_level, m_p.extraction_params, m_p.activate_extraction),
+        PhiAndKExtractionTaggingCriterion(m_dx, m_p.threshold_phi, m_p.threshold_K, m_level, m_p.scalar_extraction_params, m_p.activate_extraction),
         current_state, tagging_criterion);
 }
 void ScalarFieldLevel::specificPostTimeStep()
@@ -160,10 +158,10 @@ void ScalarFieldLevel::specificPostTimeStep()
 
      bool first_step = (m_time == 0.0);
 
-     if (m_p.activate_extraction == 1)
+     if (m_p.activate_scalar_extraction == 1)
     {
     
-    int min_level = m_p.extraction_params.min_extraction_level();
+    int min_level = m_p.scalar_extraction_params.min_extraction_level();
     bool fill_ghosts = false;
     bool calculate_min_level = at_level_timestep_multiple(min_level);
 
@@ -188,7 +186,7 @@ void ScalarFieldLevel::specificPostTimeStep()
  
     BoxLoops::loop(
         ExcisionDiagnostics(m_dx, m_p.center, 0.0, 
-                            m_p.extraction_params.extraction_radii[0]), //m_p.extraction_params.extraction_radii.size() -1 - i
+                            m_p.scalar_extraction_params.extraction_radii[0]), //m_p.extraction_params.extraction_radii.size() -1 - i
         m_state_diagnostics, m_state_diagnostics, SKIP_GHOST_CELLS,
         disable_simd());
 
@@ -205,7 +203,7 @@ void ScalarFieldLevel::specificPostTimeStep()
 
 
 
-    SmallDataIO integral_file("data/VolumeIntegrals_r"+std::to_string((int)m_p.extraction_params.extraction_radii[0]), m_dt, m_time,
+    SmallDataIO integral_file("data/VolumeIntegrals_r"+std::to_string((int)m_p.scalar_extraction_params.extraction_radii[0]), m_dt, m_time,
                                   m_restart_time, SmallDataIO::APPEND,
                                   first_step);
     // remove any duplicate data if this is post restart
@@ -224,12 +222,12 @@ void ScalarFieldLevel::specificPostTimeStep()
       //  m_bh_amr.m_interpolator->refresh(fill_ghosts);
         m_bh_amr.fill_multilevel_ghosts(VariableType::diagnostic,
                                         Interval(c_flux, c_flux));
-        FluxExtraction flux_extraction(m_p.extraction_params, m_dt, m_time,
+        FluxExtraction flux_extraction(m_p.scalar_extraction_params, m_dt, m_time,
                                        first_step, m_restart_time);
         flux_extraction.execute_query(m_bh_amr.m_interpolator);
 
         ScalarExtraction phi_extraction(
-                        m_p.extraction_params, m_dt, m_time, first_step,
+                        m_p.scalar_extraction_params, m_dt, m_time, first_step,
                         m_restart_time);
         phi_extraction.execute_query(m_gr_amr.m_interpolator);
 
@@ -237,6 +235,8 @@ void ScalarFieldLevel::specificPostTimeStep()
 
 
      if (m_p.calc_weyl){
+            
+            int min_level_weyl = m_p.extraction_params.min_extraction_level();
             // Populate the Weyl Scalar values on the grid
             fillAllGhosts();
             BoxLoops::loop(
@@ -244,7 +244,7 @@ void ScalarFieldLevel::specificPostTimeStep()
                 m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 
             // Do the extraction on the min extraction level
-            if (m_level == min_level)
+            if (m_level == min_level_weyl)
             {
                 CH_TIME("WeylExtraction");
                 // Now refresh the interpolator and do the interpolation
