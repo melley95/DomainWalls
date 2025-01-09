@@ -8,7 +8,7 @@ endif
 # trace the chain of included makefiles
 makefiles += releasedExamples_AMRPoisson_execVariableCoefficient
 
-DIM = 3
+DIM = 2
 ## Define the variables needed by Make.example
 
 # Choose a method USE_CTTK or USE_CTTKHybrid

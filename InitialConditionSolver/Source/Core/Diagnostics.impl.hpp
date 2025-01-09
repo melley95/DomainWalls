@@ -48,8 +48,14 @@ void Diagnostics<method_t, matter_t>::compute_constraint_terms(
             Tensor<1, Real, SpaceDim> d1_K;
             derivs.get_d1(d1_K, iv, multigrid_vars_box, c_K_0);
             Tensor<3, Real, SpaceDim> d2_Vi;
+#if CH_SPACEDIM == 3
             derivs.get_d2_vector(d2_Vi, iv, multigrid_vars_box,
                                  Interval(c_V1_0, c_V3_0));
+#endif
+#if CH_SPACEDIM == 2
+            derivs.get_d2_vector(d2_Vi, iv, multigrid_vars_box,
+                                 Interval(c_V1_0, c_V2_0));
+#endif
 
             // Assign values of Aij
             Tensor<2, Real> Aij_reg;

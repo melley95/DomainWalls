@@ -195,9 +195,16 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
             Tensor<1, Real, SpaceDim> d1_K;
             derivs.get_d1(d1_K, iv, multigrid_vars_box, c_K_0);
 
+            Tensor<1, Real, SpaceDim> d1_psi_reg;
+            derivs.get_d1(d1_psi_reg, iv, multigrid_vars_box, c_psi_reg);
+
+
+
             // rhs terms, K is set to cancel matter terms only
+            Real yy = loc[1];
             rhs_box(iv, c_psi) =
-                -0.125 * A2_0 * pow(psi_0, -7.0) - laplacian_psi_reg;
+                -0.125 * A2_0 * pow(psi_0, -7.0) - laplacian_psi_reg 
+                -d1_psi_reg[1]/yy;
 
             // Get d_i V_i and laplacians
 #if CH_SPACEDIM == 3
@@ -295,11 +302,15 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
                 rhs_box(iv, c_U) += -laplacian_U;
             }
 
+            //Grids::get_loc_cartoon(loc, iv, a_dx);
+     
             // add the aCoef term
             aCoef_box(iv, c_psi) += -0.875 * A2_0 * pow(psi_0, -8.0);
 
-            Grids::get_loc_cartoon(loc, iv, a_dx);
-            Real yy = loc[1];
+            cCoef_box(iv, c_psi) += 1.0/yy;
+
+            
+           
             // Cartoon term
             aCoef_box(iv, c_V2) += -1.0 / pow(yy, 2.0);
 

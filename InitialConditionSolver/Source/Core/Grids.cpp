@@ -233,14 +233,19 @@ void Grids::update_psi0(Vector<LevelData<FArrayBox> *> multigrid_vars,
                 {
                     multigrid_vars_box(iv, c_V1_0) += dpsi_box(iv, c_V1);
                     multigrid_vars_box(iv, c_V2_0) += dpsi_box(iv, c_V2);
+#if CH_SPACEDIM == 3
                     multigrid_vars_box(iv, c_V3_0) += dpsi_box(iv, c_V3);
+#endif
                     multigrid_vars_box(iv, c_U_0) += dpsi_box(iv, c_U);
+
                 }
                 else
                 {
                     multigrid_vars_box(iv, c_V1_0) = dpsi_box(iv, c_V1);
                     multigrid_vars_box(iv, c_V2_0) = dpsi_box(iv, c_V2);
+#if CH_SPACEDIM == 3
                     multigrid_vars_box(iv, c_V3_0) = dpsi_box(iv, c_V3);
+#endif
                     multigrid_vars_box(iv, c_U_0) = dpsi_box(iv, c_U);
                 }
             }

@@ -82,7 +82,9 @@ void output_solver_data(
     variable_names[0] = "dpsi_reg";
     variable_names[1] = "V1";
     variable_names[2] = "V2";
+#if CH_SPACEDIM == 3
     variable_names[3] = "V3";
+#endif
     variable_names[4] = "U";
 
     for (int icomp = 0; icomp < NUM_METRIC_VARS; icomp++)
@@ -333,7 +335,9 @@ void set_output_data(LevelData<FArrayBox> &a_grchombo_vars,
         // Conformally flat, and lapse = 1
         grchombo_vars_box.setVal(1.0, c_h11);
         grchombo_vars_box.setVal(1.0, c_h22);
+#if CH_SPACEDIM == 3
         grchombo_vars_box.setVal(1.0, c_h33);
+#endif        
         grchombo_vars_box.setVal(1.0, c_lapse);
 
         // now non constant terms by location
@@ -363,14 +367,18 @@ void set_output_data(LevelData<FArrayBox> &a_grchombo_vars,
                 multigrid_vars_box(iv, c_A11_0) * factor;
             grchombo_vars_box(iv, c_A12) =
                 multigrid_vars_box(iv, c_A12_0) * factor;
-            grchombo_vars_box(iv, c_A13) =
-                multigrid_vars_box(iv, c_A13_0) * factor;
             grchombo_vars_box(iv, c_A22) =
                 multigrid_vars_box(iv, c_A22_0) * factor;
+#if CH_SPACEDIM == 3                
+            grchombo_vars_box(iv, c_A13) =
+                multigrid_vars_box(iv, c_A13_0) * factor;
             grchombo_vars_box(iv, c_A23) =
                 multigrid_vars_box(iv, c_A23_0) * factor;
             grchombo_vars_box(iv, c_A33) =
                 multigrid_vars_box(iv, c_A33_0) * factor;
+#endif
+        
+
         }
     }
 }

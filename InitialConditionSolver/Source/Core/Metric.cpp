@@ -137,6 +137,8 @@ void Metric::compute_ctt_Aij(Tensor<2, Real> &Aij,
     DerivativeOperators derivs(a_dx);
 
     // get the derivs
+    Tensor<1, Real, SpaceDim> d1_U;
+    derivs.get_d1(d1_U, iv, multigrid_vars_box, c_U_0);
     Tensor<2, Real, SpaceDim> d2_U;
     derivs.get_d2(d2_U, iv, multigrid_vars_box, c_U_0);
 
@@ -168,7 +170,8 @@ void Metric::compute_ctt_Aij(Tensor<2, Real> &Aij,
             Grids::get_loc_cartoon(loc_cartoon, iv, a_dx); // defaulted center
             int cartoon_idx = 1;
             trace += multigrid_vars_box(iv, c_V2_0) / loc_cartoon[cartoon_idx];
-        }
+            trace += d1_U[1] / loc_cartoon[cartoon_idx];
+         }
 
         // set the values of Aij
         FOR2(i, j)
