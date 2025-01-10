@@ -166,11 +166,11 @@ void Metric::compute_ctt_Aij(Tensor<2, Real> &Aij,
 
         if (SpaceDim == 2){
             // Trace gets extra cartoon term see 1603.00362 eqn (A.4)
-            RealVect loc_cartoon;
-            Grids::get_loc_cartoon(loc_cartoon, iv, a_dx); // defaulted center
+            RealVect loc;
+            Grids::get_loc(loc, iv, a_dx, center); // defaulted center
             int cartoon_idx = 1;
-            trace += multigrid_vars_box(iv, c_V2_0) / loc_cartoon[cartoon_idx];
-            trace += d1_U[1] / loc_cartoon[cartoon_idx];
+            trace += multigrid_vars_box(iv, c_V2_0) / loc[cartoon_idx];
+            trace += d1_U[1] / loc[cartoon_idx]; // ME: added missing term
          }
 
         // set the values of Aij
@@ -215,42 +215,34 @@ void Metric::set_Aww_reg(Real &Aww, const FArrayBox &multigrid_vars_box,
     DerivativeOperators derivs(a_dx);
 
     // get the derivs
+    Tensor<1, Real, SpaceDim> d1_U;
+    derivs.get_d1(d1_U, iv, multigrid_vars_box, c_U_0);
+
     Tensor<2, Real, SpaceDim> d2_U;
     derivs.get_d2(d2_U, iv, multigrid_vars_box, c_U_0);
 
     Tensor<2, Real, SpaceDim> d1_Vi;
     Tensor<3, Real, SpaceDim> d2_Vi;
-#if CH_SPACEDIM == 3
-    derivs.get_d1_vector(d1_Vi, iv, multigrid_vars_box,
-                         Interval(c_V1_0, c_V3_0));
-    derivs.get_d2_vector(d2_Vi, iv, multigrid_vars_box,
-                         Interval(c_V1_0, c_V3_0));
-#endif
-#if CH_SPACEDIM == 2
+
+
     derivs.get_d1_vector(d1_Vi, iv, multigrid_vars_box,
                          Interval(c_V1_0, c_V2_0));
     derivs.get_d2_vector(d2_Vi, iv, multigrid_vars_box,
                          Interval(c_V1_0, c_V2_0));
-#endif
+
 
     // Periodic: Use ansatz B.3 in B&S (p547) JCA TODO: We are not using this U
     // when constructing Aij. Non-periodic: Compact ansatz B.7 in B&S (p547)
-    RealVect loc_cartoon;
-    Grids::get_loc_cartoon(loc_cartoon, iv, a_dx);
+    RealVect loc;
+    Grids::get_loc(loc, iv, a_dx, center);
     int cartoon_idx = 1;
-    Real trace_2d =
-        multigrid_vars_box(iv, c_V2_0) /
-        loc_cartoon[cartoon_idx]; // for trace just over x,y components
+    Real trace = 0.0;
     if (!m_metric_params.method_compact)
     {
-        FOR1(i)
-        {
-            trace_2d += d1_Vi[i][i];  // THIS HAS TO BE UDPATED
-            //+ d2_U[i][i];
-        }
+        FOR1(i) { trace += d1_Vi[i][i] + d2_U[i][i]; }
 
-        Aww = -0.5 * trace_2d +
-              1.5 * multigrid_vars_box(iv, c_V2_0) / loc_cartoon[cartoon_idx];
+        Aww = 4.0 * (multigrid_vars_box(iv, c_V2_0) + d1_U[1])/(3.0 * loc[cartoon_idx]) - 
+                        (2.0 / 3.0)  * trace;
     }
     else
     // Not yet adapted for cartoon method
