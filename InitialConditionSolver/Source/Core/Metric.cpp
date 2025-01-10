@@ -166,8 +166,8 @@ void Metric::compute_ctt_Aij(Tensor<2, Real> &Aij,
 
         if (SpaceDim == 2){
             // Trace gets extra cartoon term see 1603.00362 eqn (A.4)
-            RealVect loc;
-            Grids::get_loc(loc, iv, a_dx, center); // defaulted center
+           // RealVect loc;
+           // Grids::get_loc(loc, iv, a_dx, center); // defaulted center
             int cartoon_idx = 1;
             trace += multigrid_vars_box(iv, c_V2_0) / loc[cartoon_idx];
             trace += d1_U[1] / loc[cartoon_idx]; // ME: added missing term
@@ -233,8 +233,8 @@ void Metric::set_Aww_reg(Real &Aww, const FArrayBox &multigrid_vars_box,
 
     // Periodic: Use ansatz B.3 in B&S (p547) JCA TODO: We are not using this U
     // when constructing Aij. Non-periodic: Compact ansatz B.7 in B&S (p547)
-    RealVect loc;
-    Grids::get_loc(loc, iv, a_dx, center);
+  //  RealVect loc;
+   // Grids::get_loc(loc, iv, a_dx, center);
     int cartoon_idx = 1;
     Real trace = 0.0;
     if (!m_metric_params.method_compact)

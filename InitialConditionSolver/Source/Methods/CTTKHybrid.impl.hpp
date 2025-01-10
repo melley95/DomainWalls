@@ -201,10 +201,15 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
 
 
             // rhs terms, K is set to cancel matter terms only
-            Real yy = loc[1];
+            
             rhs_box(iv, c_psi) =
-                -0.125 * A2_0 * pow(psi_0, -7.0) - laplacian_psi_reg 
-                -d1_psi_reg[1]/yy;
+                -0.125 * A2_0 * pow(psi_0, -7.0) - laplacian_psi_reg;
+                
+            if (SpaceDim ==2)
+            {
+                Real yy = loc[1];
+                rhs_box(iv, c_psi) += -d1_psi_reg[1]/yy;
+            }
 
             // Get d_i V_i and laplacians
 #if CH_SPACEDIM == 3
