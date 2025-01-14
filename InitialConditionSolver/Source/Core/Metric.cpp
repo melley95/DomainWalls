@@ -144,6 +144,8 @@ void Metric::compute_ctt_Aij(Tensor<2, Real> &Aij,
 
     Tensor<2, Real, SpaceDim> d1_Vi;
     Tensor<3, Real, SpaceDim> d2_Vi;
+
+    int cartoon_idx = 1;
 #if CH_SPACEDIM == 3
     derivs.get_d1_vector(d1_Vi, iv, multigrid_vars_box,
                          Interval(c_V1_0, c_V3_0));
@@ -168,7 +170,7 @@ void Metric::compute_ctt_Aij(Tensor<2, Real> &Aij,
             // Trace gets extra cartoon term see 1603.00362 eqn (A.4)
            // RealVect loc;
            // Grids::get_loc(loc, iv, a_dx, center); // defaulted center
-            int cartoon_idx = 1;
+            //int cartoon_idx = 1;
             trace += multigrid_vars_box(iv, c_V2_0) / loc[cartoon_idx];
             trace += d1_U[1] / loc[cartoon_idx]; // ME: added missing term
          }
@@ -188,10 +190,24 @@ void Metric::compute_ctt_Aij(Tensor<2, Real> &Aij,
                 0.75 * d1_Vi[i][i] -
                 0.125 * (d2_U[i][i] + loc[0] * d2_Vi[0][i][i] +
                          loc[1] * d2_Vi[1][i][i]);          //there was a bug here in the previous 2D?
+
+            
 #if CH_SPACEDIM == 3
             trace += -0.125 * loc[2] * d2_Vi[2][i][i];
 #endif
         }
+
+        if (SpaceDim == 2){
+
+            trace += 0.75* multigrid_vars_box(iv, c_V2_0) / loc[cartoon_idx];
+            trace -= 0.125*d1_U[1] / loc[cartoon_idx];
+            trace -= -0.125*(loc[0]*d1_Vi[0][cartoon_idx]/loc[cartoon_idx] + loc[1]*d1_Vi[1][cartoon_idx]/loc[cartoon_idx]);
+            trace += 0.125*loc[cartoon_idx]* multigrid_vars_box(iv, c_V2_0)/(loc[cartoon_idx]*loc[cartoon_idx]);
+
+
+        }
+
+
         // set the values of Aij
         FOR2(i, j)
         {
@@ -229,13 +245,15 @@ void Metric::set_Aww_reg(Real &Aww, const FArrayBox &multigrid_vars_box,
                          Interval(c_V1_0, c_V2_0));
     derivs.get_d2_vector(d2_Vi, iv, multigrid_vars_box,
                          Interval(c_V1_0, c_V2_0));
+    
+    int cartoon_idx = 1;
 
 
     // Periodic: Use ansatz B.3 in B&S (p547) JCA TODO: We are not using this U
     // when constructing Aij. Non-periodic: Compact ansatz B.7 in B&S (p547)
   //  RealVect loc;
    // Grids::get_loc(loc, iv, a_dx, center);
-    int cartoon_idx = 1;
+   
     Real trace = 0.0;
     if (!m_metric_params.method_compact)
     {
@@ -247,21 +265,33 @@ void Metric::set_Aww_reg(Real &Aww, const FArrayBox &multigrid_vars_box,
     else
     // Not yet adapted for cartoon method
     {
-        // FOR1(i)
-        // {
-        //     trace += 0.75 * d1_Vi[i][i] -
-        //              0.125 * (d2_U[i][i] + loc[0] * d2_V1[i][i] +
-        //                       loc[1] * d2_V2[i][i] + loc[2] * d2_V3[i][i]);
-        // }
-        // // set the values of Aij
-        // FOR2(i, j)
-        // {
-        //     Aij[i][j] = 0.75 * d1_Vi[i][j] - 0.125 * d2_U[i][j] +
-        //                 0.75 * d1_Vi[j][i] - 0.125 * d2_U[j][i] -
-        //                 0.125 * (loc[0] * (d2_V1[i][j] + d2_V1[j][i]) +
-        //                          loc[1] * (d2_V2[i][j] + d2_V2[j][i]) +
-        //                          loc[2] * (d2_V3[i][j] + d2_V3[j][i])) -
-        //                 2.0 / 3.0 * delta(i, j) * trace;
-        // }
+        FOR1(i)
+        {
+            trace +=
+                0.75 * d1_Vi[i][i] -
+                0.125 * (d2_U[i][i] + loc[0] * d2_Vi[0][i][i] +
+                         loc[1] * d2_Vi[1][i][i]);        
+
+            
+
+        }
+
+
+        trace += 0.75 * multigrid_vars_box(iv, c_V2_0) / loc[cartoon_idx];
+        trace -= 0.125 * d1_U[1] / loc[cartoon_idx];
+        trace -= -0.125 * (loc[0]*d1_Vi[0][cartoon_idx]/loc[cartoon_idx] + loc[1]*d1_Vi[1][cartoon_idx]/loc[cartoon_idx]);
+        trace += 0.125 * loc[cartoon_idx]* multigrid_vars_box(iv, c_V2_0)/(loc[cartoon_idx]*loc[cartoon_idx]);
+
+
+        
+
+        Aww = 3.0 * multigrid_vars_box(iv, c_V2_0) / (loc[cartoon_idx]);
+        Aww -= 0.5 * d1_U[1] / loc[cartoon_idx];
+        Aww -= 0.5 * (loc[0]*d1_Vi[0][cartoon_idx]/loc[cartoon_idx] + loc[1]*d1_Vi[1][cartoon_idx]/loc[cartoon_idx]);
+        Aww += 0.5 * loc[cartoon_idx]* multigrid_vars_box(iv, c_V2_0)/(loc[cartoon_idx]*loc[cartoon_idx]);
+
+        Aww += (-2.0/3.0)*trace; 
+
+
     }
 }

@@ -136,6 +136,7 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
         FArrayBox &cCoef_box = (*a_cCoef)[dit()];
         // JCAurre: Initialise rhs=0, aCoef=0 and bCoef=1 for all constraint
         // variables
+    
         for (int comp = 0; comp < NUM_CONSTRAINT_VARS; comp++)
         {
             rhs_box.setVal(0.0, comp);
@@ -160,6 +161,9 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
             IntVect iv = bit();
             RealVect loc;
             Grids::get_loc(loc, iv, a_dx, center);
+
+            int cartoon_idx = 1;
+            Real yy = loc[cartoon_idx];
 
             // Calculate the actual value of psi including BH part
             Real psi_reg = multigrid_vars_box(iv, c_psi_reg);
@@ -207,7 +211,7 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
                 
             if (SpaceDim ==2)
             {
-                Real yy = loc[1];
+               // Real yy = loc[1];
                 rhs_box(iv, c_psi) += -d1_psi_reg[1]/yy;
             }
 
@@ -248,17 +252,14 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
             // Cartoon terms
             if (SpaceDim == 2)
             {
-                RealVect cartoon_loc;
-                Grids::get_loc_cartoon(cartoon_loc, iv, a_dx);
-                int cartoon_idx = 1;
-                // rhs_box(iv, c_V1) +=                 //THIS NEEDS TO BE
-                // ADAPTED
-                //     -(d1_V1[cartoon_idx] / cartoon_loc[cartoon_idx]);
-                // rhs_box(iv, c_V2) += -(
-                //     d1_V2[cartoon_idx] / cartoon_loc[cartoon_idx] -
-                //     multigrid_vars_box(iv, c_V2_0) /
-                //         (cartoon_loc[cartoon_idx] *
-                //         cartoon_loc[cartoon_idx]));
+               // RealVect cartoon_loc;
+              //  Grids::get_loc_cartoon(cartoon_loc, iv, a_dx);
+             //   int cartoon_idx = 1;
+              //  Real yy = loc[cartoon_idx];
+                rhs_box(iv, c_V1) +=  -(di_Vi[0][cartoon_idx] / yy);
+                rhs_box(iv, c_V2) += -(di_Vi[1][cartoon_idx] / yy) 
+                                     + (multigrid_vars_box(iv, c_V2_0) / yy*yy);
+
             }
             // Periodic: Use ansatz B.3 in B&S (p547) JCA TODO: We are not using
             // this U when constructing Aij Non-periodic: Compact ansatz B.7 in
@@ -272,17 +273,16 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
                 // Cartoon terms
                 if (SpaceDim == 2)
                 {
-                    RealVect cartoon_loc;
-                    Grids::get_loc_cartoon(cartoon_loc, iv, a_dx);
-                    int cartoon_idx = 1;
-                    // Tensor<1, Real, SpaceDim> d1_U = // THIS NEEDS TO BE
-                    // ADAPTED
-                    //     derivs.get_d1_vector(iv, multigrid_vars_box, a_dx,
-                    //     c_U_0);
-                    // rhs_box(iv, c_U) +=
-                    //     -d1_U[cartoon_idx] / cartoon_loc[cartoon_idx] -
-                    //     .25 * multigrid_vars_box(iv, c_V2_0) /
-                    //         cartoon_loc[cartoon_idx];
+                    //RealVect cartoon_loc;
+                    //Grids::get_loc_cartoon(cartoon_loc, iv, a_dx);
+                  //  int cartoon_idx = 1;
+                   // Real yy = loc[cartoon_idx];
+                    Tensor<1, Real, SpaceDim> di_U;
+                    derivs.get_d1(di_U, iv, multigrid_vars_box, c_U_0);
+                    rhs_box(iv, c_U) +=
+                         -di_U[cartoon_idx] / yy -
+                        .25 * multigrid_vars_box(iv, c_V2_0) / yy;
+                            
                 }
             }
             else
@@ -294,6 +294,14 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
                         -loc[i] * (pow(psi_0, 6.0) *
                                    (2.0 / 3.0 * d1_K[i] +
                                     8.0 * M_PI * G_Newton * emtensor.Si[i]));
+                }
+                 if (SpaceDim == 2)
+                {
+                    Tensor<1, Real, SpaceDim> di_U;
+                    derivs.get_d1(di_U, iv, multigrid_vars_box, c_U_0);
+                    rhs_box(iv, c_U) +=
+                         -di_U[cartoon_idx] / yy;
+
                 }
             }
 
@@ -321,6 +329,10 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
 
             cCoef_box(iv, c_V1) += 1.0 / yy;
             cCoef_box(iv, c_V2) += 1.0 / yy;
+
+
+         
+
             cCoef_box(iv, c_U) += 1.0 / yy;
         }
     }

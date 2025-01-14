@@ -36,6 +36,9 @@ void Diagnostics<method_t, matter_t>::compute_constraint_terms(
             RealVect loc;
             Grids::get_loc(loc, iv, a_dx, center);
 
+            int cartoon_idx = 1;
+            Real yy = loc[cartoon_idx];
+
             // Calculate the actual value of psi including BH part
             Real psi_reg = multigrid_vars_box(iv, c_psi_reg);
             Real psi_bh = metric->compute_bowenyork_psi(loc);
@@ -53,6 +56,9 @@ void Diagnostics<method_t, matter_t>::compute_constraint_terms(
                                  Interval(c_V1_0, c_V3_0));
 #endif
 #if CH_SPACEDIM == 2
+            Tensor<2, Real, SpaceDim> di_Vi;
+            derivs.get_d1_vector(di_Vi, iv, multigrid_vars_box,
+                                 Interval(c_V1_0, c_V2_0));
             derivs.get_d2_vector(d2_Vi, iv, multigrid_vars_box,
                                  Interval(c_V1_0, c_V2_0));
 #endif
@@ -71,6 +77,12 @@ void Diagnostics<method_t, matter_t>::compute_constraint_terms(
                         (Aij_reg[i][j] + Aij_bh[i][j]);
             }
 
+            Real Aww_reg; // Cartoon term
+            if (SpaceDim == 2)
+            {
+                metric->set_Aww_reg(Aww_reg, multigrid_vars_box, iv, a_dx, loc);
+                A2_0 += Aww_reg * Aww_reg;
+            }
             // Compute emtensor components
             const auto emtensor =
                 matter->compute_emtensor(iv, a_dx, multigrid_vars_box);
@@ -78,7 +90,9 @@ void Diagnostics<method_t, matter_t>::compute_constraint_terms(
             diagnostic_vars_box(iv, c_rho) = emtensor.rho;
             diagnostic_vars_box(iv, c_S1) = emtensor.Si[0];
             diagnostic_vars_box(iv, c_S2) = emtensor.Si[1];
+#if CH_SPACEDIM == 3
             diagnostic_vars_box(iv, c_S3) = emtensor.Si[2];
+#endif
 
             // Set value for K
             Real K = multigrid_vars_box(iv, c_K_0);
@@ -96,40 +110,77 @@ void Diagnostics<method_t, matter_t>::compute_constraint_terms(
             Real Mom1 =
                 -2.0 / 3.0 * d1_K[0] - 8.0 * M_PI * G_Newton * emtensor.Si[0];
             Real Mom2 =
-                -2.0 / 3.0 * d1_K[1] - 8.0 * M_PI * G_Newton * emtensor.Si[1];
+                -2.0 / 3.0 * d1_K[1] - 8.0 * M_PI * G_Newton * emtensor.Si[1];       
+#if CH_SPACEDIM == 3           
             Real Mom3 =
                 -2.0 / 3.0 * d1_K[2] - 8.0 * M_PI * G_Newton * emtensor.Si[2];
-
+#endif
             Real Mom1_abs = 2.0 / 3.0 * abs(d1_K[0]) +
                             8.0 * M_PI * G_Newton * abs(emtensor.Si[0]);
             Real Mom2_abs = 2.0 / 3.0 * abs(d1_K[1]) +
                             8.0 * M_PI * G_Newton * abs(emtensor.Si[1]);
+#if CH_SPACEDIM == 3                            
             Real Mom3_abs = 2.0 / 3.0 * abs(d1_K[2]) +
                             8.0 * M_PI * G_Newton * abs(emtensor.Si[2]);
+#endif
 
             FOR(i)
             {
                 Mom1 += psim6 * d2_Vi[0][i][i];
                 Mom2 += psim6 * d2_Vi[1][i][i];
+#if CH_SPACEDIM == 3                
                 Mom3 += psim6 * d2_Vi[2][i][i];
+#endif                
 
                 Mom1_abs += abs(psim6 * d2_Vi[0][i][i]);
                 Mom2_abs += abs(psim6 * d2_Vi[1][i][i]);
+#if CH_SPACEDIM == 3
                 Mom3_abs += abs(psim6 * d2_Vi[2][i][i]);
+#endif
             }
 
+#if CH_SPACEDIM == 2
+                Mom1 += psim6 * (di_Vi[0][cartoon_idx] / yy) ;
+                                    
+                Mom2 += psim6 * ((di_Vi[1][cartoon_idx] / yy) 
+                                     + (multigrid_vars_box(iv, c_V2_0) / yy*yy));
+
+                Mom1_abs += abs(psim6 * (di_Vi[0][cartoon_idx] / yy));
+                                    
+                Mom2_abs += abs(psim6 * ((di_Vi[1][cartoon_idx] / yy) 
+                                     + (multigrid_vars_box(iv, c_V2_0) / yy*yy)));
+#endif
+
+#if CH_SPACEDIM == 2
+            Real Mom = sqrt(Mom1 * Mom1 + Mom2 * Mom2);
+#endif
+
+#if CH_SPACEDIM == 3
             Real Mom = sqrt(Mom1 * Mom1 + Mom2 * Mom2 + Mom3 * Mom3);
+#endif
 
             diagnostic_vars_box(iv, c_Mom1) = Mom1;
             diagnostic_vars_box(iv, c_Mom2) = Mom2;
+#if CH_SPACEDIM == 3
             diagnostic_vars_box(iv, c_Mom3) = Mom3;
+#endif
             diagnostic_vars_box(iv, c_Mom) = Mom;
             diagnostic_vars_box(iv, c_Mom1_abs) = Mom1_abs;
             diagnostic_vars_box(iv, c_Mom2_abs) = Mom2_abs;
+#if CH_SPACEDIM == 3
             diagnostic_vars_box(iv, c_Mom3_abs) = Mom3_abs;
+#endif
+
+#if CH_SPACEDIM == 2
+            diagnostic_vars_box(iv, c_Mom_abs) =
+                sqrt(Mom1_abs * Mom1_abs + Mom2_abs * Mom2_abs);
+#endif
+
+#if CH_SPACEDIM == 3
             diagnostic_vars_box(iv, c_Mom_abs) =
                 sqrt(Mom1_abs * Mom1_abs + Mom2_abs * Mom2_abs +
                      Mom3_abs * Mom3_abs);
+#endif
         }
     }
 }
@@ -162,13 +213,17 @@ void Diagnostics<method_t, matter_t>::normalise_constraints(
             Real Ham = diagnostic_vars_box(iv, c_Ham);
             Real Mom1 = diagnostic_vars_box(iv, c_Mom1);
             Real Mom2 = diagnostic_vars_box(iv, c_Mom2);
+#if CH_SPACEDIM == 3
             Real Mom3 = diagnostic_vars_box(iv, c_Mom3);
+#endif
             Real Mom = diagnostic_vars_box(iv, c_Mom);
             // Real Mom = sqrt(Mom1 * Mom1 + Mom2 * Mom2 + Mom3 * Mom3);
 
             Real Mom1_abs = diagnostic_vars_box(iv, c_Mom1_abs);
             Real Mom2_abs = diagnostic_vars_box(iv, c_Mom2_abs);
+#if CH_SPACEDIM == 3
             Real Mom3_abs = diagnostic_vars_box(iv, c_Mom3_abs);
+#endif
 
             Real Ham_abs = diagnostic_vars_box(iv, c_Ham_abs);
             Real Mom_abs = diagnostic_vars_box(iv, c_Mom_abs);
@@ -178,7 +233,7 @@ void Diagnostics<method_t, matter_t>::normalise_constraints(
 
             IntVect lo = IntVect::Zero;
             IntVect hi = nCells - IntVect::Unit;
-            if (iv[0] == lo[0] || iv[1] == lo[1] || iv[2] == lo[2] ||
+            if (iv[0] == lo[0] || iv[1] == lo[1] || iv[2] == lo[2] ||   //ME : do I need to modify?
                 iv[0] == hi[0] || iv[1] == hi[1] || iv[2] == hi[2])
             {
                 diagnostic_vars_box(iv, c_Ham_norm) = 0;
