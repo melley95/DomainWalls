@@ -57,11 +57,11 @@ class Grids
     // This takes an IntVect and writes the physical coordinates to a RealVect
     static void get_loc(RealVect &a_out_loc, const IntVect &a_iv,
                         const RealVect &a_dx,
-                        const std::array<double, SpaceDim> center);
-
-    static void get_loc_cartoon(RealVect &a_out_loc, const IntVect &a_iv,
-                        const RealVect &a_dx,
                         const std::array<double, SpaceDim> center = {D_DECL(0, 0, 0)});
+
+   // static void get_loc_cartoon(RealVect &a_out_loc, const IntVect &a_iv,
+     //                   const RealVect &a_dx,
+       //                 const std::array<double, SpaceDim> center = {D_DECL(0, 0, 0)});
 
     void read_grids(std::string input_filename);
 

@@ -78,11 +78,11 @@ void Diagnostics<method_t, matter_t>::compute_constraint_terms(
             }
 
             Real Aww_reg; // Cartoon term
-            if (SpaceDim == 2)
-            {
+#if CH_SPACEDIM == 2
+            
                 metric->set_Aww_reg(Aww_reg, multigrid_vars_box, iv, a_dx, loc);
                 A2_0 += Aww_reg * Aww_reg;
-            }
+#endif            
             // Compute emtensor components
             const auto emtensor =
                 matter->compute_emtensor(iv, a_dx, multigrid_vars_box);

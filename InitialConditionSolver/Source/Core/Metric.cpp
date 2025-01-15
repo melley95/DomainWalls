@@ -166,14 +166,14 @@ void Metric::compute_ctt_Aij(Tensor<2, Real> &Aij,
     {
         FOR1(i) { trace += d1_Vi[i][i] + d2_U[i][i]; }
 
-        if (SpaceDim == 2){
+#if CH_SPACEDIM == 2
             // Trace gets extra cartoon term see 1603.00362 eqn (A.4)
            // RealVect loc;
            // Grids::get_loc(loc, iv, a_dx, center); // defaulted center
             //int cartoon_idx = 1;
             trace += multigrid_vars_box(iv, c_V2_0) / loc[cartoon_idx];
             trace += d1_U[1] / loc[cartoon_idx]; // ME: added missing term
-         }
+#endif
 
         // set the values of Aij
         FOR2(i, j)
@@ -197,7 +197,7 @@ void Metric::compute_ctt_Aij(Tensor<2, Real> &Aij,
 #endif
         }
 
-        if (SpaceDim == 2){
+#if CH_SPACEDIM == 2
 
             trace += 0.75* multigrid_vars_box(iv, c_V2_0) / loc[cartoon_idx];
             trace -= 0.125*d1_U[1] / loc[cartoon_idx];
@@ -205,7 +205,7 @@ void Metric::compute_ctt_Aij(Tensor<2, Real> &Aij,
             trace += 0.125*loc[cartoon_idx]* multigrid_vars_box(iv, c_V2_0)/(loc[cartoon_idx]*loc[cartoon_idx]);
 
 
-        }
+#endif
 
 
         // set the values of Aij

@@ -108,8 +108,8 @@ void DerivativeOperators::scalar_Laplacian(Real &laplacian, const IntVect &a_iv,
                                            const FArrayBox &a_vars_box,
                                            const int a_comp)
 {
-    if (SpaceDim == 3)
-    {
+#if CH_SPACEDIM == 3
+    
         FOR1(idir)
         {
             IntVect iv_offset1 = a_iv;
@@ -124,9 +124,9 @@ void DerivativeOperators::scalar_Laplacian(Real &laplacian, const IntVect &a_iv,
                                 1.0 * a_vars_box(iv_offset1, a_comp));
             laplacian += d2comp_dxdx;
         }
-    }
-    else if (SpaceDim == 2)
-    {
+#endif
+#if CH_SPACEDIM == 2
+    
         FOR1(idir)
         {
             IntVect iv_offset1 = a_iv;
@@ -143,8 +143,8 @@ void DerivativeOperators::scalar_Laplacian(Real &laplacian, const IntVect &a_iv,
         }
         int cartoon_idx = 1; // For now assume cartoon_coord is y
         RealVect loc;
-        std::array<double, SpaceDim> center;
-        Grids::get_loc_cartoon(loc, a_iv, m_dx); // m_grid_params.center); //Center has been defaulted
+        //std::array<double, SpaceDim> center;
+        Grids::get_loc(loc, a_iv, m_dx); // m_grid_params.center); //Center has been defaulted
         IntVect iv_offset1 = a_iv;
         IntVect iv_offset2 = a_iv;
         iv_offset1[cartoon_idx] -= 1;
@@ -153,7 +153,7 @@ void DerivativeOperators::scalar_Laplacian(Real &laplacian, const IntVect &a_iv,
                      a_vars_box(iv_offset1, a_comp)) /
                     (2.0 * m_dx[cartoon_idx] * loc[cartoon_idx]);
         laplacian += d2comp_ww;
-    }
+#endif
 }
 
 void DerivativeOperators::vector_Laplacian(Tensor<1, Real, SpaceDim> &laplacian,

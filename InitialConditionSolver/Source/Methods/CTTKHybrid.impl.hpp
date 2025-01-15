@@ -86,11 +86,11 @@ void CTTKHybrid<matter_t>::solve_analytic(
                         (Aij_reg[i][j] + Aij_bh[i][j]);
             }
             Real Aww_reg; // Cartoon term
-            if (SpaceDim == 2)
-            {
+#if CH_SPACEDIM == 2
+            
                 metric->set_Aww_reg(Aww_reg, multigrid_vars_box, iv, a_dx, loc);
                 A2_0 += Aww_reg * Aww_reg;
-            }
+#endif
 
             // Compute emtensor components
             const auto emtensor =
@@ -186,11 +186,11 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
                         (Aij_reg[i][j] + Aij_bh[i][j]);
             }
             Real Aww_reg; // Cartoon term
-            if (SpaceDim == 2)
-            {
+#if CH_SPACEDIM == 2
+            
                 metric->set_Aww_reg(Aww_reg, multigrid_vars_box, iv, a_dx, loc);
                 A2_0 += Aww_reg * Aww_reg;
-            }
+#endif
 
             // Compute emtensor components
             const auto emtensor =
@@ -209,11 +209,11 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
             rhs_box(iv, c_psi) =
                 -0.125 * A2_0 * pow(psi_0, -7.0) - laplacian_psi_reg;
                 
-            if (SpaceDim ==2)
-            {
+#if CH_SPACEDIM == 2
+            
                // Real yy = loc[1];
                 rhs_box(iv, c_psi) += -d1_psi_reg[1]/yy;
-            }
+#endif
 
             // Get d_i V_i and laplacians
 #if CH_SPACEDIM == 3
@@ -250,8 +250,8 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
                 (2.0 / 3.0 * d1_K[2] + 8.0 * M_PI * G_Newton * emtensor.Si[2]);
 #endif
             // Cartoon terms
-            if (SpaceDim == 2)
-            {
+#if CH_SPACEDIM == 2
+            
                // RealVect cartoon_loc;
               //  Grids::get_loc_cartoon(cartoon_loc, iv, a_dx);
              //   int cartoon_idx = 1;
@@ -260,7 +260,7 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
                 rhs_box(iv, c_V2) += -(di_Vi[1][cartoon_idx] / yy) 
                                      + (multigrid_vars_box(iv, c_V2_0) / yy*yy);
 
-            }
+#endif
             // Periodic: Use ansatz B.3 in B&S (p547) JCA TODO: We are not using
             // this U when constructing Aij Non-periodic: Compact ansatz B.7 in
             // B&S (p547)
@@ -271,8 +271,8 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
                 rhs_box(iv, c_U) += -0.25 * di_Vi[2][2];
 #endif
                 // Cartoon terms
-                if (SpaceDim == 2)
-                {
+#if CH_SPACEDIM == 2
+                
                     //RealVect cartoon_loc;
                     //Grids::get_loc_cartoon(cartoon_loc, iv, a_dx);
                   //  int cartoon_idx = 1;
@@ -283,7 +283,7 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
                          -di_U[cartoon_idx] / yy -
                         .25 * multigrid_vars_box(iv, c_V2_0) / yy;
                             
-                }
+#endif
             }
             else
             {
@@ -295,14 +295,14 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
                                    (2.0 / 3.0 * d1_K[i] +
                                     8.0 * M_PI * G_Newton * emtensor.Si[i]));
                 }
-                 if (SpaceDim == 2)
-                {
+#if CH_SPACEDIM == 2
+                
                     Tensor<1, Real, SpaceDim> di_U;
                     derivs.get_d1(di_U, iv, multigrid_vars_box, c_U_0);
                     rhs_box(iv, c_U) +=
                          -di_U[cartoon_idx] / yy;
 
-                }
+#endif
             }
 
             if (m_method_params.deactivate_zero_mode)

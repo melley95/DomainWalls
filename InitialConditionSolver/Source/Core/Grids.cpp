@@ -520,12 +520,12 @@ void Grids::get_loc(RealVect &a_out_loc, const IntVect &a_iv,
     FOR1(i) { a_out_loc[i] -= center[i]; }
 }
 
-void Grids::get_loc_cartoon(RealVect &a_out_loc, const IntVect &a_iv,
-                            const RealVect &a_dx,
-                            const std::array<double, SpaceDim> center)
-{
-    a_out_loc = a_iv + 0.5 * RealVect::Unit;
-    a_out_loc *= a_dx;
+//void Grids::get_loc_cartoon(RealVect &a_out_loc, const IntVect &a_iv,
+  //                          const RealVect &a_dx,
+   //                         const std::array<double, SpaceDim> center)
+//{
+  //  a_out_loc = a_iv + 0.5 * RealVect::Unit;
+   // a_out_loc *= a_dx;
     // Line below obsolete but makes it easier to compare to get_loc()
-    FOR1(i) { a_out_loc[i] -= center[i]; }
-}
+    //FOR1(i) { a_out_loc[i] -= center[i]; }
+//}
