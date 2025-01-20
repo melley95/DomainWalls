@@ -146,11 +146,11 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
 
             // // this prevents small amounts of noise in the sources
             // // activating the zero modes - (Garfinkle trick)
-            // if (m_method_params.deactivate_zero_mode)
-            // {
-            //     // Seems to work best to set this relative to the tolerance
-            //     aCoef_box.setVal(-1e4 * tolerance, iconstraint);
-            // }
+             if (m_method_params.deactivate_zero_mode)
+            {
+                Real small_number = 1e-10;
+                aCoef_box.setVal(-small_number, comp);
+            }
         }
         Box unghosted_box = rhs_box.box();
         BoxIterator bit(unghosted_box);
@@ -249,18 +249,7 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
                 pow(psi_0, 6.0) *
                 (2.0 / 3.0 * d1_K[2] + 8.0 * M_PI * G_Newton * emtensor.Si[2]);
 #endif
-            // Cartoon terms
-#if CH_SPACEDIM == 2
-            
-               // RealVect cartoon_loc;
-              //  Grids::get_loc_cartoon(cartoon_loc, iv, a_dx);
-             //   int cartoon_idx = 1;
-              //  Real yy = loc[cartoon_idx];
-                rhs_box(iv, c_V1) +=  -(di_Vi[0][cartoon_idx] / yy);
-                rhs_box(iv, c_V2) += -(di_Vi[1][cartoon_idx] / yy) 
-                                     + (multigrid_vars_box(iv, c_V2_0) / yy*yy);
-
-#endif
+           
             // Periodic: Use ansatz B.3 in B&S (p547) JCA TODO: We are not using
             // this U when constructing Aij Non-periodic: Compact ansatz B.7 in
             // B&S (p547)
@@ -279,9 +268,7 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
                    // Real yy = loc[cartoon_idx];
                     Tensor<1, Real, SpaceDim> di_U;
                     derivs.get_d1(di_U, iv, multigrid_vars_box, c_U_0);
-                    rhs_box(iv, c_U) +=
-                         -di_U[cartoon_idx] / yy -
-                        .25 * multigrid_vars_box(iv, c_V2_0) / yy;
+                    rhs_box(iv, c_U) += - .25 * multigrid_vars_box(iv, c_V2_0) / yy;
                             
 #endif
             }
@@ -295,14 +282,7 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
                                    (2.0 / 3.0 * d1_K[i] +
                                     8.0 * M_PI * G_Newton * emtensor.Si[i]));
                 }
-#if CH_SPACEDIM == 2
-                
-                    Tensor<1, Real, SpaceDim> di_U;
-                    derivs.get_d1(di_U, iv, multigrid_vars_box, c_U_0);
-                    rhs_box(iv, c_U) +=
-                         -di_U[cartoon_idx] / yy;
 
-#endif
             }
 
             if (m_method_params.deactivate_zero_mode)
@@ -313,6 +293,20 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
                 rhs_box(iv, c_V3) += -laplacian_V[2];
 #endif
                 rhs_box(iv, c_U) += -laplacian_U;
+ // Cartoon terms
+#if CH_SPACEDIM == 2
+                rhs_box(iv, c_V1) +=  -(di_Vi[0][cartoon_idx] / yy);
+                rhs_box(iv, c_V2) += -(di_Vi[1][cartoon_idx] / yy) 
+                                     + (multigrid_vars_box(iv, c_V2_0) / yy*yy);
+                
+                                    Tensor<1, Real, SpaceDim> di_U;
+                derivs.get_d1(di_U, iv, multigrid_vars_box, c_U_0);
+                rhs_box(iv, c_U) += -di_U[cartoon_idx] / yy;
+
+#endif
+
+
+
             }
 
             //Grids::get_loc_cartoon(loc, iv, a_dx);

@@ -108,7 +108,7 @@ void DerivativeOperators::scalar_Laplacian(Real &laplacian, const IntVect &a_iv,
                                            const FArrayBox &a_vars_box,
                                            const int a_comp)
 {
-#if CH_SPACEDIM == 3
+// #if CH_SPACEDIM == 3
     
         FOR1(idir)
         {
@@ -124,15 +124,19 @@ void DerivativeOperators::scalar_Laplacian(Real &laplacian, const IntVect &a_iv,
                                 1.0 * a_vars_box(iv_offset1, a_comp));
             laplacian += d2comp_dxdx;
         }
-#endif
-#if CH_SPACEDIM == 2
+
+
+/* ME: dont think we need the code below, the cartoon laplacian terms are already included
+in the equations themselves  
+ #endif
+ if CH_SPACEDIM == 2
     
-        FOR1(idir)
-        {
+   /    FOR1(idir)
+     /  {
             IntVect iv_offset1 = a_iv;
-            IntVect iv_offset2 = a_iv;
-            iv_offset1[idir] -= 1;
-            iv_offset2[idir] += 1;
+           IntVect iv_offset2 = a_iv;
+         iv_offset1[idir] -= 1;
+           iv_offset2[idir] += 1;
 
             // 2nd order stencil for now
             Real d2comp_dxdx = 1.0 / (m_dx[idir] * m_dx[idir]) *
@@ -153,7 +157,7 @@ void DerivativeOperators::scalar_Laplacian(Real &laplacian, const IntVect &a_iv,
                      a_vars_box(iv_offset1, a_comp)) /
                     (2.0 * m_dx[cartoon_idx] * loc[cartoon_idx]);
         laplacian += d2comp_ww;
-#endif
+#endif */
 }
 
 void DerivativeOperators::vector_Laplacian(Tensor<1, Real, SpaceDim> &laplacian,

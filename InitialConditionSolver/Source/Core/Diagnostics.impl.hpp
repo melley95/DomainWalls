@@ -51,6 +51,9 @@ void Diagnostics<method_t, matter_t>::compute_constraint_terms(
             Tensor<1, Real, SpaceDim> d1_K;
             derivs.get_d1(d1_K, iv, multigrid_vars_box, c_K_0);
             Tensor<3, Real, SpaceDim> d2_Vi;
+
+            Tensor<1, Real, SpaceDim> d1_psi_0;
+            derivs.get_d1(d1_psi_0, iv, multigrid_vars_box, c_psi_0);
 #if CH_SPACEDIM == 3
             derivs.get_d2_vector(d2_Vi, iv, multigrid_vars_box,
                                  Interval(c_V1_0, c_V3_0));
@@ -102,10 +105,20 @@ void Diagnostics<method_t, matter_t>::compute_constraint_terms(
                 K_0_squared - 24.0 * M_PI * G_Newton * emtensor.rho -
                 1.5 * A2_0 * pow(psi_0, -12.0) -
                 12.0 * laplacian_psi_reg * pow(psi_0, -5.0);
+
+#if CH_SPACEDIM == 2
+            diagnostic_vars_box(iv, c_Ham) -= d1_psi_0[cartoon_idx] / yy;
+#endif
+
+
             diagnostic_vars_box(iv, c_Ham_abs) =
                 K_0_squared + 24.0 * M_PI * G_Newton * emtensor.rho +
                 1.5 * abs(A2_0) * pow(psi_0, -12.0) +
                 12.0 * abs(laplacian_psi_reg) * pow(psi_0, -5.0);
+
+#if CH_SPACEDIM == 2
+            diagnostic_vars_box(iv, c_Ham_abs) += abs(d1_psi_0[cartoon_idx] / yy);
+#endif
 
             Real Mom1 =
                 -2.0 / 3.0 * d1_K[0] - 8.0 * M_PI * G_Newton * emtensor.Si[0];
@@ -147,8 +160,8 @@ void Diagnostics<method_t, matter_t>::compute_constraint_terms(
 
                 Mom1_abs += abs(psim6 * (di_Vi[0][cartoon_idx] / yy));
                                     
-                Mom2_abs += abs(psim6 * ((di_Vi[1][cartoon_idx] / yy) 
-                                     + (multigrid_vars_box(iv, c_V2_0) / yy*yy)));
+                Mom2_abs += abs(psim6 * ((di_Vi[1][cartoon_idx] / yy))) 
+                                     + abs(multigrid_vars_box(iv, c_V2_0) / yy*yy);
 #endif
 
 #if CH_SPACEDIM == 2
