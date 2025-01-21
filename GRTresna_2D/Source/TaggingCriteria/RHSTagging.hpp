@@ -1,3 +1,8 @@
+/* GRTresna
+ * Copyright 2024 The GRTL Collaboration.
+ * Please refer to LICENSE in GRTresna's root directory.
+ */
+
 #ifndef RHSTAGGING_HPP_
 #define RHSTAGGING_HPP_
 
@@ -15,11 +20,7 @@ class RHSTagging : public TaggingCriterion
     {
     }
 
-    ~RHSTagging()
-    {
-        delete method;
-        delete matter;
-    }
+    ~RHSTagging() {}
 
     void set_regrid_condition(LevelData<FArrayBox> &a_condition,
                               LevelData<FArrayBox> &a_multigrid_vars,
@@ -32,8 +33,6 @@ class RHSTagging : public TaggingCriterion
     matter_t const *matter;
 
     const Real G_Newton;
-
-    // Vector<LevelData<FArrayBox> *> *vect_tagging_criterion;
 };
 
 template <typename method_t, typename matter_t>
@@ -66,7 +65,8 @@ void RHSTagging<method_t, matter_t>::set_regrid_condition(
 
             // Calculate the actual value of psi including BH part
             Real psi_reg = multigrid_vars_box(iv, c_psi_reg);
-            Real psi_bh = method->metric->compute_bowenyork_psi(loc);
+            Real psi_bh =
+                method->psi_and_Aij_functions->compute_bowenyork_psi(loc);
             Real psi_0 = psi_reg + psi_bh;
             Real laplacian_psi_reg;
             derivs.scalar_Laplacian(laplacian_psi_reg, iv, multigrid_vars_box,
@@ -74,10 +74,10 @@ void RHSTagging<method_t, matter_t>::set_regrid_condition(
 
             // Get values of Aij
             Tensor<2, Real> Aij_reg;
-            method->metric->compute_ctt_Aij(Aij_reg, multigrid_vars_box, iv,
-                                               a_dx, loc);
+            method->psi_and_Aij_functions->compute_ctt_Aij(
+                Aij_reg, multigrid_vars_box, iv, a_dx, loc);
             Tensor<2, Real> Aij_bh;
-            method->metric->compute_bowenyork_Aij(Aij_bh, loc);
+            method->psi_and_Aij_functions->compute_bowenyork_Aij(Aij_bh, loc);
             // This is \bar  A_ij \bar A^ij
             Real A2_0 = 0.0;
             FOR2(i, j)
@@ -92,14 +92,7 @@ void RHSTagging<method_t, matter_t>::set_regrid_condition(
 
             if (regrid_radius > 0)
             {
-#if CH_SPACEDIM == 2
-            Real rr = sqrt(loc[0] * loc[0] + loc[1] * loc[1]);
-#endif
-
-#if CH_SPACEDIM == 3
-                Real rr = sqrt(D_TERM(loc[0] * loc[0], +loc[1] * loc[1],
-                                      +loc[2] * loc[2]));
-#endif
+                Real rr = sqrt(loc[0] * loc[0] +loc[1] * loc[1]);
                 if (rr < regrid_radius)
                 {
                     condition_box(iv, 0) = 1.0;
@@ -109,23 +102,11 @@ void RHSTagging<method_t, matter_t>::set_regrid_condition(
             {
                 // the condition is similar to the rhs but we take abs
                 // value of the contributions and add in effect of psi_0 via log
-#if CH_SPACEDIM == 2
-
-                 condition_box(iv, 0) =
+                condition_box(iv, 0) =
                     2.0 * M_PI * G_Newton * emtensor.rho + abs(0.125 * A2_0) +
                     log(psi_0) + laplacian_psi_reg +
                     8.0 * M_PI * G_Newton *
                         (abs(emtensor.Si[0]) + abs(emtensor.Si[1]));
-#endif
-
-#if CH_SPACEDIM == 3     
-                 condition_box(iv, 0) =
-                    2.0 * M_PI * G_Newton * emtensor.rho + abs(0.125 * A2_0) +
-                    log(psi_0) + laplacian_psi_reg +
-                    8.0 * M_PI * G_Newton *
-                        (abs(emtensor.Si[0]) + abs(emtensor.Si[1]) +
-                         abs(emtensor.Si[2]));
-#endif
             }
         }
     }

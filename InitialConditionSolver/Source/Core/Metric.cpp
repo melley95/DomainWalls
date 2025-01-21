@@ -89,8 +89,16 @@ void Metric::compute_bowenyork_Aij(
     Real rbh2;
     get_bh_coords(rbh2, loc_bh2, loc, m_metric_params.bh2_offset);
 
+
+#if CH_SPACEDIM == 2
+    RealVect n1 = {loc_bh1[0] / rbh1, loc_bh1[1] / rbh1};
+    RealVect n2 = {loc_bh2[0] / rbh2, loc_bh2[1] / rbh2};
+#endif
+
+#if CH_SPACEDIM == 3
     RealVect n1 = {D_DECL(loc_bh1[0] / rbh1, loc_bh1[1] / rbh1, loc_bh1[2] / rbh1)};
     RealVect n2 = {D_DECL(loc_bh2[0] / rbh2, loc_bh2[1] / rbh2, loc_bh2[2] / rbh2)};
+#endif
 
     // the Bowen York params
     RealVect J1 = m_metric_params.bh1_spin;
@@ -225,6 +233,7 @@ void Metric::compute_ctt_Aij(Tensor<2, Real> &Aij,
 
 //NEED TO ADAPT BELOW
 
+#if CH_SPACEDIM == 2
 void Metric::set_Aww_reg(Real &Aww, const FArrayBox &multigrid_vars_box,
                  const IntVect &iv, const RealVect &a_dx, const RealVect &loc)
 {
@@ -294,4 +303,5 @@ void Metric::set_Aww_reg(Real &Aww, const FArrayBox &multigrid_vars_box,
 
 
     }
+#endif
 }
