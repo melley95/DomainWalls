@@ -89,6 +89,11 @@ void CTTK<matter_t>::solve_analytic(LevelData<FArrayBox> *a_multigrid_vars,
                         (Aij_reg[i][j] + Aij_bh[i][j]);
             }
 
+            Real Aww_reg; // Cartoon term
+
+            psi_and_Aij_functions->set_Aww_reg(Aww_reg, multigrid_vars_box, iv, a_dx, loc);
+            A2_0 += Aww_reg * Aww_reg;
+
             // Compute emtensor components
             const auto emtensor =
                 matter->compute_emtensor(iv, a_dx, multigrid_vars_box);
@@ -118,7 +123,8 @@ template <typename matter_t>
 void CTTK<matter_t>::set_elliptic_terms(
     LevelData<FArrayBox> *a_multigrid_vars, LevelData<FArrayBox> *a_rhs,
     RefCountedPtr<LevelData<FArrayBox>> a_aCoef,
-    RefCountedPtr<LevelData<FArrayBox>> a_bCoef, const RealVect &a_dx)
+    RefCountedPtr<LevelData<FArrayBox>> a_bCoef,
+    RefCountedPtr<LevelData<FArrayBox>> a_cCoef, const RealVect &a_dx)
 {
     DerivativeOperators derivs(a_dx);
     DataIterator dit = a_rhs->dataIterator();
@@ -128,6 +134,7 @@ void CTTK<matter_t>::set_elliptic_terms(
         FArrayBox &rhs_box = (*a_rhs)[dit()];
         FArrayBox &aCoef_box = (*a_aCoef)[dit()];
         FArrayBox &bCoef_box = (*a_bCoef)[dit()];
+        FArrayBox &cCoef_box = (*a_cCoef)[dit()];
         // JCAurre: Initialise rhs=0, aCoef=0 and bCoef=1 for all constraint
         // variables
         for (int comp = 0; comp < NUM_CONSTRAINT_VARS; comp++)
@@ -135,6 +142,7 @@ void CTTK<matter_t>::set_elliptic_terms(
             rhs_box.setVal(0.0, comp);
             aCoef_box.setVal(0.0, comp);
             bCoef_box.setVal(1.0, comp);
+            cCoef_box.setVal(0.0, comp);
 
             // this prevents small amounts of noise in the sources
             // activating the zero modes - (Garfinkle trick) see 2207.03125
@@ -152,6 +160,9 @@ void CTTK<matter_t>::set_elliptic_terms(
             IntVect iv = bit();
             RealVect loc;
             Grids::get_loc(loc, iv, a_dx, center);
+
+            int cartoon_idx = 1;
+            Real yy = loc[cartoon_idx];
 
             // Calculate the actual value of psi including BH part
             Real psi_reg = multigrid_vars_box(iv, c_psi_reg);
@@ -175,12 +186,20 @@ void CTTK<matter_t>::set_elliptic_terms(
                         (Aij_reg[i][j] + Aij_bh[i][j]);
             }
 
+            Real Aww_reg; // Cartoon term
+
+            psi_and_Aij_functions->set_Aww_reg(Aww_reg, multigrid_vars_box, iv, a_dx, loc);
+            A2_0 += Aww_reg * Aww_reg;
+
             // Compute emtensor components
             const auto emtensor =
                 matter->compute_emtensor(iv, a_dx, multigrid_vars_box);
 
             Tensor<1, Real, SpaceDim> d1_K;
             derivs.get_d1(d1_K, iv, multigrid_vars_box, c_K_0);
+
+            Tensor<1, Real, SpaceDim> d1_U;
+            derivs.get_d1(d1_U, iv, multigrid_vars_box, c_U_0);
 
             // Get d_i V_i and laplacians
             Tensor<2, Real, SpaceDim> d1_Vi;
@@ -207,8 +226,8 @@ void CTTK<matter_t>::set_elliptic_terms(
             // Non-periodic: Compact ansatz B.7 in B&S (p547)
             if (!m_method_params.use_compact_Vi_ansatz)
             {
-                rhs_box(iv, c_U) =
-                    -0.25 * (d1_Vi[0][0] + d1_Vi[1][1]);
+              rhs_box(iv, c_U) =
+                    -0.25 * (d1_Vi[0][0] + d1_Vi[1][1] + multigrid_vars_box(iv, c_V2_0) / yy );
             }
             else
             {
@@ -224,10 +243,20 @@ void CTTK<matter_t>::set_elliptic_terms(
 
             if (m_method_params.deactivate_zero_mode)
             {
-                rhs_box(iv, c_V1) += -laplacian_Vi[0];
-                rhs_box(iv, c_V2) += -laplacian_Vi[1];
-                rhs_box(iv, c_U) += -laplacian_U;
+                rhs_box(iv, c_V1) += -laplacian_Vi[0] - (d1_Vi[0][cartoon_idx] / yy);
+                rhs_box(iv, c_V2) += -laplacian_Vi[1] -(d1_Vi[1][cartoon_idx] / yy) 
+                                     + (multigrid_vars_box(iv, c_V2_0) / yy*yy);
+                rhs_box(iv, c_U) += -laplacian_U -d1_U[cartoon_idx] / yy;
             }
+            aCoef_box(iv, c_V2) += -1.0 / pow(yy, 2.0);
+
+            cCoef_box(iv, c_V1) += 1.0 / yy;
+            cCoef_box(iv, c_V2) += 1.0 / yy;
+
+
+         
+
+            cCoef_box(iv, c_U) += 1.0 / yy;
         }
     }
 }

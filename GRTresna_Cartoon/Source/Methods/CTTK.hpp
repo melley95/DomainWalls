@@ -39,6 +39,7 @@ template <typename matter_t> class CTTK
                             LevelData<FArrayBox> *a_rhs,
                             RefCountedPtr<LevelData<FArrayBox>> a_aCoef,
                             RefCountedPtr<LevelData<FArrayBox>> a_bCoef,
+                            RefCountedPtr<LevelData<FArrayBox>> a_cCoef,
                             const RealVect &a_dx);
 
     params_t m_method_params;
