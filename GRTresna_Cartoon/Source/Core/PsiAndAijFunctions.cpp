@@ -186,7 +186,7 @@ void PsiAndAijFunctions::compute_ctt_Aij(Tensor<2, Real> &Aij,
 
         trace += 0.75* multigrid_vars_box(iv, c_V2_0) / loc[cartoon_idx];
         trace -= 0.125*d1_U[1] / loc[cartoon_idx];
-        trace -= -0.125*(loc[0]*d1_Vi[0][cartoon_idx]/loc[cartoon_idx] + loc[1]*d1_Vi[1][cartoon_idx]/loc[cartoon_idx]);
+        trace -= 0.125*(loc[0]*d1_Vi[0][cartoon_idx]/loc[cartoon_idx] + loc[1]*d1_Vi[1][cartoon_idx]/loc[cartoon_idx]);
         trace += 0.125*loc[cartoon_idx]* multigrid_vars_box(iv, c_V2_0)/(loc[cartoon_idx]*loc[cartoon_idx]);
         // set the values of Aij
         FOR2(i, j)
@@ -252,18 +252,20 @@ void PsiAndAijFunctions::set_Aww_reg(Real &Aww, const FArrayBox &multigrid_vars_
 
         trace += 0.75 * multigrid_vars_box(iv, c_V2_0) / loc[cartoon_idx];
         trace -= 0.125 * d1_U[1] / loc[cartoon_idx];
-        trace -= -0.125 * (loc[0]*d1_Vi[0][cartoon_idx]/loc[cartoon_idx] + loc[1]*d1_Vi[1][cartoon_idx]/loc[cartoon_idx]);
+        trace -= 0.125 * (loc[0]*d1_Vi[0][cartoon_idx]/loc[cartoon_idx] + loc[1]*d1_Vi[1][cartoon_idx]/loc[cartoon_idx]);
         trace += 0.125 * loc[cartoon_idx]* multigrid_vars_box(iv, c_V2_0)/(loc[cartoon_idx]*loc[cartoon_idx]);
 
 
         
 
-        Aww = 3.0 * multigrid_vars_box(iv, c_V2_0) / (loc[cartoon_idx]);
-        Aww -= 0.5 * d1_U[1] / loc[cartoon_idx];
-        Aww -= 0.5 * (loc[0]*d1_Vi[0][cartoon_idx]/loc[cartoon_idx] + loc[1]*d1_Vi[1][cartoon_idx]/loc[cartoon_idx]);
-        Aww += 0.5 * loc[cartoon_idx]* multigrid_vars_box(iv, c_V2_0)/(loc[cartoon_idx]*loc[cartoon_idx]);
+        Aww = (3.0/2.0) * multigrid_vars_box(iv, c_V2_0) / (loc[cartoon_idx]);
+        Aww -= 0.25 * d1_U[1] / loc[cartoon_idx];
+        Aww -= 0.25 * (loc[0]*d1_Vi[0][cartoon_idx]/loc[cartoon_idx] + loc[1]*d1_Vi[1][cartoon_idx]/loc[cartoon_idx]);
+        Aww += 0.25 * loc[cartoon_idx]* multigrid_vars_box(iv, c_V2_0)/(loc[cartoon_idx]*loc[cartoon_idx]);
 
         Aww += (-2.0/3.0)*trace; 
+
+       
 
 
     }

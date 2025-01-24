@@ -109,6 +109,8 @@ void CTTKHybrid<matter_t>::solve_analytic(
             multigrid_vars_box(iv, c_A11_0) = Aij_reg[0][0] + Aij_bh[0][0];
             multigrid_vars_box(iv, c_A22_0) = Aij_reg[1][1] + Aij_bh[1][1];
             multigrid_vars_box(iv, c_A12_0) = Aij_reg[0][1] + Aij_bh[0][1];
+
+            multigrid_vars_box(iv, c_Aww_0) = Aww_reg;
         }
     }
 }
@@ -197,12 +199,12 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
             derivs.get_d1(d1_U, iv, multigrid_vars_box, c_U_0);
                    
 
-            Tensor<1, Real, SpaceDim> d1_psi_0;
-            derivs.get_d1(d1_psi_0, iv, multigrid_vars_box, psi_0);
+            Tensor<1, Real, SpaceDim> d1_psi_reg;
+            derivs.get_d1(d1_psi_reg, iv, multigrid_vars_box, psi_reg);
 
             // rhs terms, K is set to cancel matter terms only
             rhs_box(iv, c_psi) =
-                -0.125 * A2_0 * pow(psi_0, -7.0) - laplacian_psi_reg -d1_psi_0[1]/yy;
+                -0.125 * A2_0 * pow(psi_0, -7.0) - laplacian_psi_reg -d1_psi_reg[1]/yy;
 
 
             // Get d_i V_i and laplacians

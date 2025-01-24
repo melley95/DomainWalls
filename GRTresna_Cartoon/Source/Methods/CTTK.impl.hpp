@@ -115,6 +115,10 @@ void CTTK<matter_t>::solve_analytic(LevelData<FArrayBox> *a_multigrid_vars,
             multigrid_vars_box(iv, c_A22_0) = Aij_reg[1][1] + Aij_bh[1][1];
             multigrid_vars_box(iv, c_A12_0) = Aij_reg[0][1] + Aij_bh[0][1];
 
+            multigrid_vars_box(iv, c_Aww_0) = Aww_reg;
+
+
+
         }
     }
 }

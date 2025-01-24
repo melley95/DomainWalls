@@ -348,6 +348,10 @@ void set_output_data(LevelData<FArrayBox> &a_grchombo_vars,
                 multigrid_vars_box(iv, c_A12_0) * factor;
             grchombo_vars_box(iv, c_A22) =
                 multigrid_vars_box(iv, c_A22_0) * factor;
+            grchombo_vars_box(iv, c_Aww) =
+                multigrid_vars_box(iv, c_Aww_0) * factor;
+            
+
 
         }
     }

@@ -119,7 +119,7 @@ void RHSTagging<method_t, matter_t>::set_regrid_condition(
                     log(psi_0) + laplacian_psi_reg +
                     8.0 * M_PI * G_Newton *
                         (abs(emtensor.Si[0]) + abs(emtensor.Si[1]))  
-                    - d1_psi_0[cartoon_idx] / yy;
+                    + d1_psi_0[cartoon_idx] / yy;
             }
         }
     }

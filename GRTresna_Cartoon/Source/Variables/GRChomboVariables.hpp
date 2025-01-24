@@ -26,6 +26,8 @@ enum
     c_A12,
     c_A22,
 
+    c_Aww,
+
 
     c_Theta,
 
@@ -60,6 +62,8 @@ static constexpr char const *variable_names[NUM_GRCHOMBO_VARS] = {
 
     "A11",    "A12",   "A22",
 
+    "Aww",
+
     "Theta",
 
     "Gamma1", "Gamma2", 
@@ -74,7 +78,7 @@ static constexpr char const *variable_names[NUM_GRCHOMBO_VARS] = {
 
 static constexpr std::array<int, NUM_GRCHOMBO_VARS> const vars_parity = {
     EVEN,   EVEN,   ODD_XY,  EVEN,   EVEN, EVEN,
-    ODD_XY,  EVEN,   EVEN,  EVEN,   ODD_X, ODD_Y,
+    ODD_XY,  EVEN,  EVEN, EVEN,  EVEN,   ODD_X, ODD_Y,
     EVEN,   ODD_X,  ODD_Y,   ODD_X, ODD_Y,  EVEN,  EVEN};
 
 } // namespace GRChomboVariables

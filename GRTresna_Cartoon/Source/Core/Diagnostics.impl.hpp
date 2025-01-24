@@ -104,12 +104,11 @@ void Diagnostics<method_t, matter_t>::compute_constraint_terms(
             diagnostic_vars_box(iv, c_Ham) =
                 K_0_squared - 24.0 * M_PI * G_Newton * emtensor.rho -
                 1.5 * A2_0 * pow(psi_0, -12.0) -
-                12.0 * laplacian_psi_reg * pow(psi_0, -5.0);
+                12.0 * pow(psi_0, -5.0) * (laplacian_psi_reg + d1_psi_0[cartoon_idx] / yy );
             diagnostic_vars_box(iv, c_Ham_abs) =
                 K_0_squared + 24.0 * M_PI * G_Newton * emtensor.rho +
                 1.5 * abs(A2_0) * pow(psi_0, -12.0) +
-                12.0 * abs(laplacian_psi_reg) * pow(psi_0, -5.0)
-                - d1_psi_0[cartoon_idx] / yy;
+                12.0 * pow(psi_0, -5.0) * (abs(laplacian_psi_reg) + abs(d1_psi_0[cartoon_idx] / yy) );
 
             Real Mom1 =
                 -2.0 / 3.0 * d1_K[0] - 8.0 * M_PI * G_Newton * emtensor.Si[0];

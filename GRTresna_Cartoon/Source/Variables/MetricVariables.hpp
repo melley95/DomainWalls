@@ -23,6 +23,7 @@ enum
     c_A11_0,
     c_A12_0,
     c_A22_0,
+    c_Aww_0,
 
 
     NUM_METRIC_VARS
@@ -37,11 +38,13 @@ static const std::array<std::string, NUM_METRIC_VARS> variable_names = {
 
     "K_0",
 
-    "A11_0",   "A12_0",  "A22_0"};
+    "A11_0",   "A12_0",  "A22_0",
+    
+    "Aww_0"};
 
 static constexpr std::array<int, NUM_METRIC_VARS> const vars_parity = {
     EVEN, ODD_X,  ODD_Y, EVEN,   EVEN,
-    EVEN, ODD_XY, EVEN};
+    EVEN, ODD_XY, EVEN, EVEN};
 
 } // namespace MetricVariables
 
