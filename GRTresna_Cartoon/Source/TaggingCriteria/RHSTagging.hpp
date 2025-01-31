@@ -68,12 +68,11 @@ void RHSTagging<method_t, matter_t>::set_regrid_condition(
 
             // Calculate the actual value of psi including BH part
             Real psi_reg = multigrid_vars_box(iv, c_psi_reg);
-            Real psi_bh =
-                method->psi_and_Aij_functions->compute_bowenyork_psi(loc);
-            Real psi_0 = psi_reg + psi_bh;
+            
+            Real psi_0 = psi_reg;
 
-            Tensor<1, Real, SpaceDim> d1_psi_0;
-            derivs.get_d1(d1_psi_0, iv, multigrid_vars_box, psi_0);
+            Tensor<1, Real, SpaceDim> d1_psi_reg;
+            derivs.get_d1(d1_psi_reg, iv, multigrid_vars_box, c_psi_reg);
 
             Real laplacian_psi_reg;
             derivs.scalar_Laplacian(laplacian_psi_reg, iv, multigrid_vars_box,
@@ -83,14 +82,14 @@ void RHSTagging<method_t, matter_t>::set_regrid_condition(
             Tensor<2, Real> Aij_reg;
             method->psi_and_Aij_functions->compute_ctt_Aij(
                 Aij_reg, multigrid_vars_box, iv, a_dx, loc);
-            Tensor<2, Real> Aij_bh;
-            method->psi_and_Aij_functions->compute_bowenyork_Aij(Aij_bh, loc);
+   //         Tensor<2, Real> Aij_bh;
+     //       method->psi_and_Aij_functions->compute_bowenyork_Aij(Aij_bh, loc);
             // This is \bar  A_ij \bar A^ij
             Real A2_0 = 0.0;
             FOR2(i, j)
             {
-                A2_0 += (Aij_reg[i][j] + Aij_bh[i][j]) *
-                        (Aij_reg[i][j] + Aij_bh[i][j]);
+                A2_0 += (Aij_reg[i][j]  *
+                        Aij_reg[i][j] );
             }
 
             Real Aww_reg; // Cartoon term
@@ -119,7 +118,7 @@ void RHSTagging<method_t, matter_t>::set_regrid_condition(
                     log(psi_0) + laplacian_psi_reg +
                     8.0 * M_PI * G_Newton *
                         (abs(emtensor.Si[0]) + abs(emtensor.Si[1]))  
-                    + d1_psi_0[cartoon_idx] / yy;
+                    + d1_psi_reg[cartoon_idx] / yy;
             }
         }
     }

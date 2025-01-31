@@ -146,7 +146,7 @@ void output_final_data(const Vector<LevelData<FArrayBox> *> &a_multigrid_vars,
                        const Vector<RealVect> &a_vectDx,
                        const Vector<ProblemDomain> &a_vectDomains,
                        const SimulationParameters<method_t, matter_t> &a_params,
-                       const string filename = "InitialConditionsFinal.2d.hdf5")
+                       const string filename = "InitialDataFinal.2d.hdf5")
 {
 #ifdef CH_USE_HDF5
 
@@ -317,6 +317,7 @@ void set_output_data(LevelData<FArrayBox> &a_grchombo_vars,
         // Conformally flat, and lapse = 1
         grchombo_vars_box.setVal(1.0, c_h11);
         grchombo_vars_box.setVal(1.0, c_h22);
+        grchombo_vars_box.setVal(1.0, c_hww);
         grchombo_vars_box.setVal(1.0, c_lapse);
 
         // now non constant terms by location
@@ -331,8 +332,8 @@ void set_output_data(LevelData<FArrayBox> &a_grchombo_vars,
             Grids::get_loc(loc, iv, a_dx, a_params.grid_params.center);
 
             // GRChombo conformal factor chi = psi^-4
-            Real psi_bh = psi_and_Aij_functions.compute_bowenyork_psi(loc);
-            Real chi = pow(multigrid_vars_box(iv, c_psi_reg) + psi_bh, -4.0);
+         //   Real psi_bh = psi_and_Aij_functions.compute_bowenyork_psi(loc);
+            Real chi = pow(multigrid_vars_box(iv, c_psi_reg), -4.0);
             grchombo_vars_box(iv, c_chi) = chi;
             Real factor = pow(chi, 1.5);
 

@@ -43,13 +43,15 @@ void Diagnostics<method_t, matter_t>::compute_constraint_terms(
             RealVect loc;
             Grids::get_loc(loc, iv, a_dx, center);
 
+            
             int cartoon_idx = 1;
             Real yy = loc[cartoon_idx];
-
+            //Real yy = max(loc[cartoon_idx], 1.0);
+      
             // Calculate the actual value of psi including BH part
             Real psi_reg = multigrid_vars_box(iv, c_psi_reg);
-            Real psi_bh = psi_and_Aij_functions->compute_bowenyork_psi(loc);
-            Real psi_0 = psi_reg + psi_bh;
+        //    Real psi_bh = psi_and_Aij_functions->compute_bowenyork_psi(loc);
+            Real psi_0 = psi_reg;
             const Real psim6 = 1.0 / pow(psi_0, 6.0);
 
             Real laplacian_psi_reg;
@@ -58,8 +60,8 @@ void Diagnostics<method_t, matter_t>::compute_constraint_terms(
             Tensor<1, Real, SpaceDim> d1_K;
             derivs.get_d1(d1_K, iv, multigrid_vars_box, c_K_0);
 
-             Tensor<1, Real, SpaceDim> d1_psi_0;
-            derivs.get_d1(d1_psi_0, iv, multigrid_vars_box, psi_0);
+             Tensor<1, Real, SpaceDim> d1_psi_reg;
+            derivs.get_d1(d1_psi_reg, iv, multigrid_vars_box, c_psi_reg);
 
             Tensor<2, Real, SpaceDim> di_Vi;
             derivs.get_d1_vector(di_Vi, iv, multigrid_vars_box,
@@ -73,14 +75,14 @@ void Diagnostics<method_t, matter_t>::compute_constraint_terms(
             Tensor<2, Real> Aij_reg;
             method->psi_and_Aij_functions->compute_ctt_Aij(
                 Aij_reg, multigrid_vars_box, iv, a_dx, loc);
-            Tensor<2, Real> Aij_bh;
-            psi_and_Aij_functions->compute_bowenyork_Aij(Aij_bh, loc);
+          //  Tensor<2, Real> Aij_bh;
+         //   psi_and_Aij_functions->compute_bowenyork_Aij(Aij_bh, loc);
             // This is \bar  A_ij \bar A^ij
             Real A2_0 = 0.0;
             FOR2(i, j)
             {
-                A2_0 += (Aij_reg[i][j] + Aij_bh[i][j]) *
-                        (Aij_reg[i][j] + Aij_bh[i][j]);
+                A2_0 += (Aij_reg[i][j]  *
+                        Aij_reg[i][j] );
             }
 
             Real Aww_reg; // Cartoon term
@@ -104,11 +106,11 @@ void Diagnostics<method_t, matter_t>::compute_constraint_terms(
             diagnostic_vars_box(iv, c_Ham) =
                 K_0_squared - 24.0 * M_PI * G_Newton * emtensor.rho -
                 1.5 * A2_0 * pow(psi_0, -12.0) -
-                12.0 * pow(psi_0, -5.0) * (laplacian_psi_reg + d1_psi_0[cartoon_idx] / yy );
+                12.0 * pow(psi_0, -5.0) * (laplacian_psi_reg + d1_psi_reg[cartoon_idx] / yy );
             diagnostic_vars_box(iv, c_Ham_abs) =
                 K_0_squared + 24.0 * M_PI * G_Newton * emtensor.rho +
                 1.5 * abs(A2_0) * pow(psi_0, -12.0) +
-                12.0 * pow(psi_0, -5.0) * (abs(laplacian_psi_reg) + abs(d1_psi_0[cartoon_idx] / yy) );
+                12.0 * pow(psi_0, -5.0) * (abs(laplacian_psi_reg) + abs(d1_psi_reg[cartoon_idx] / yy) );
 
             Real Mom1 =
                 -2.0 / 3.0 * d1_K[0] - 8.0 * M_PI * G_Newton * emtensor.Si[0];
@@ -124,16 +126,23 @@ void Diagnostics<method_t, matter_t>::compute_constraint_terms(
 
             FOR(i)
             {
-                Mom1 += psim6 * (d2_Vi[0][i][i] + di_Vi[0][cartoon_idx] / yy);
-                Mom2 += psim6 * (d2_Vi[1][i][i] + (di_Vi[1][cartoon_idx] / yy) 
-                                     + (multigrid_vars_box(iv, c_V2_0) / yy*yy));
+                Mom1 += psim6 * d2_Vi[0][i][i];
+                Mom2 += psim6 * d2_Vi[1][i][i];
 
 
-                Mom1_abs += abs(psim6 * d2_Vi[0][i][i]) + abs(psim6 * (di_Vi[0][cartoon_idx] / yy));
-                Mom2_abs += abs(psim6 * d2_Vi[1][i][i]) + abs(psim6 * ((di_Vi[1][cartoon_idx] / yy))) 
-                                     + abs(multigrid_vars_box(iv, c_V2_0) / yy*yy);
+                Mom1_abs += abs(psim6 * d2_Vi[0][i][i]);
+                Mom2_abs += abs(psim6 * d2_Vi[1][i][i]);
 
             }
+
+            Mom1 += psim6 * (di_Vi[0][cartoon_idx] / yy);
+            Mom2 += psim6 * (((di_Vi[1][cartoon_idx] / yy))
+                                     - (multigrid_vars_box(iv, c_V2_0) / (yy*yy)));
+       //     Mom2 += - psim6*multigrid_vars_box(iv, c_V2_0) / (yy*yy);
+
+            Mom1_abs += abs(psim6 * (di_Vi[0][cartoon_idx] / yy));
+            Mom2_abs += abs(psim6 * ((di_Vi[1][cartoon_idx] / yy))) 
+                                     + abs(multigrid_vars_box(iv, c_V2_0) / yy*yy);
 
             Real Mom = sqrt(Mom1 * Mom1 + Mom2 * Mom2);
 
@@ -193,8 +202,8 @@ void Diagnostics<method_t, matter_t>::normalise_constraints(
 
             IntVect lo = IntVect::Zero;
             IntVect hi = nCells - IntVect::Unit;
-            if (iv[0] == lo[0] || iv[1] == lo[1] ||
-                iv[0] == hi[0] || iv[1] == hi[1] )
+            if (iv[0] == lo[0] || iv[1] == lo[1] || iv[2] == lo[2] ||
+                iv[0] == hi[0] || iv[1] == hi[1] || iv[2] == hi[2])
             {
                 diagnostic_vars_box(iv, c_Ham_norm) = 0;
                 diagnostic_vars_box(iv, c_Mom_norm) = 0;

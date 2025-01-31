@@ -38,7 +38,7 @@ inline void openFile(std::string name)
         ofstream myfile;
         myfile.open(name + ".txt");
         // Write the headers
-        myfile << "NL_iteration" << std::setw(20) << "Ham error [%]"
-               << std::setw(20) << "Mom error [%]" << endl;
+        myfile << "NL_iteration" << std::setw(20) << "Ham"
+               << std::setw(20) << "Mom" << endl;
     }
 }

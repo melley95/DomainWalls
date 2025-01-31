@@ -70,8 +70,8 @@ void CTTKHybrid<matter_t>::solve_analytic(
 
             // Calculate the actual value of psi including BH part
             Real psi_reg = multigrid_vars_box(iv, c_psi_reg);
-            Real psi_bh = psi_and_Aij_functions->compute_bowenyork_psi(loc);
-            Real psi_0 = psi_reg + psi_bh;
+           // Real psi_bh = psi_and_Aij_functions->compute_bowenyork_psi(loc);
+            Real psi_0 = psi_reg;
             Real laplacian_psi_reg;
             derivs.scalar_Laplacian(laplacian_psi_reg, iv, multigrid_vars_box,
                                     c_psi_reg);
@@ -80,14 +80,14 @@ void CTTKHybrid<matter_t>::solve_analytic(
             Tensor<2, Real> Aij_reg;
             psi_and_Aij_functions->compute_ctt_Aij(Aij_reg, multigrid_vars_box,
                                                    iv, a_dx, loc);
-            Tensor<2, Real> Aij_bh;
-            psi_and_Aij_functions->compute_bowenyork_Aij(Aij_bh, loc);
+            //Tensor<2, Real> Aij_bh;
+            //psi_and_Aij_functions->compute_bowenyork_Aij(Aij_bh, loc);
             // This is \bar  A_ij \bar A^ij
             Real A2_0 = 0.0;
             FOR2(i, j)
             {
-                A2_0 += (Aij_reg[i][j] + Aij_bh[i][j]) *
-                        (Aij_reg[i][j] + Aij_bh[i][j]);
+                A2_0 += (Aij_reg[i][j] *
+                        Aij_reg[i][j]);
             }
             Real Aww_reg; // Cartoon term
 
@@ -106,9 +106,9 @@ void CTTKHybrid<matter_t>::solve_analytic(
                 m_method_params.sign_of_K * sqrt(K_0_squared);
 
             // set values for \bar Aij_0
-            multigrid_vars_box(iv, c_A11_0) = Aij_reg[0][0] + Aij_bh[0][0];
-            multigrid_vars_box(iv, c_A22_0) = Aij_reg[1][1] + Aij_bh[1][1];
-            multigrid_vars_box(iv, c_A12_0) = Aij_reg[0][1] + Aij_bh[0][1];
+            multigrid_vars_box(iv, c_A11_0) = Aij_reg[0][0];
+            multigrid_vars_box(iv, c_A22_0) = Aij_reg[1][1];
+            multigrid_vars_box(iv, c_A12_0) = Aij_reg[0][1];
 
             multigrid_vars_box(iv, c_Aww_0) = Aww_reg;
         }
@@ -163,8 +163,8 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
 
             // Calculate the actual value of psi including BH part
             Real psi_reg = multigrid_vars_box(iv, c_psi_reg);
-            Real psi_bh = psi_and_Aij_functions->compute_bowenyork_psi(loc);
-            Real psi_0 = psi_reg + psi_bh;
+          //  Real psi_bh = psi_and_Aij_functions->compute_bowenyork_psi(loc);
+            Real psi_0 = psi_reg;
             Real laplacian_psi_reg;
             derivs.scalar_Laplacian(laplacian_psi_reg, iv, multigrid_vars_box,
                                     c_psi_reg);
@@ -173,14 +173,14 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
             Tensor<2, Real> Aij_reg;
             psi_and_Aij_functions->compute_ctt_Aij(Aij_reg, multigrid_vars_box,
                                                    iv, a_dx, loc);
-            Tensor<2, Real> Aij_bh;
-            psi_and_Aij_functions->compute_bowenyork_Aij(Aij_bh, loc);
+        //    Tensor<2, Real> Aij_bh;
+          //  psi_and_Aij_functions->compute_bowenyork_Aij(Aij_bh, loc);
             // This is \bar  A_ij \bar A^ij
             Real A2_0 = 0.0;
             FOR2(i, j)
             {
-                A2_0 += (Aij_reg[i][j] + Aij_bh[i][j]) *
-                        (Aij_reg[i][j] + Aij_bh[i][j]);
+                A2_0 += (Aij_reg[i][j] *
+                        Aij_reg[i][j] );
             }
 
             Real Aww_reg; // Cartoon term
@@ -200,7 +200,7 @@ void CTTKHybrid<matter_t>::set_elliptic_terms(
                    
 
             Tensor<1, Real, SpaceDim> d1_psi_reg;
-            derivs.get_d1(d1_psi_reg, iv, multigrid_vars_box, psi_reg);
+            derivs.get_d1(d1_psi_reg, iv, multigrid_vars_box, c_psi_reg);
 
             // rhs terms, K is set to cancel matter terms only
             rhs_box(iv, c_psi) =

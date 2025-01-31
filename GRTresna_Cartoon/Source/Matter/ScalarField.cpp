@@ -57,8 +57,8 @@ emtensor_t ScalarField::compute_emtensor(const IntVect a_iv,
     Grids::get_loc(loc, a_iv, a_dx, center);
 
     Real psi_reg = a_multigrid_vars_box(a_iv, c_psi_reg);
-    Real psi_bh = psi_and_Aij_functions->compute_bowenyork_psi(loc);
-    Real psi_0 = psi_reg + psi_bh;
+   // Real psi_bh = psi_and_Aij_functions->compute_bowenyork_psi(loc);
+    Real psi_0 = psi_reg;
     Real Pi_0 = a_multigrid_vars_box(a_iv, c_Pi_0);
     Real phi_0 = a_multigrid_vars_box(a_iv, c_phi_0);
 

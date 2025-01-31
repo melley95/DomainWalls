@@ -16,8 +16,8 @@ enum
 
     c_h11,
     c_h12,
-    c_h13,
     c_h22,
+    c_hww,
 
 
     c_K,
@@ -56,7 +56,9 @@ namespace GRChomboVariables
 static constexpr char const *variable_names[NUM_GRCHOMBO_VARS] = {
     "chi",
 
-    "h11",    "h12",  "h22",  
+    "h11",    "h12",  "h22",
+
+    "hww",
 
     "K",
 
@@ -77,9 +79,18 @@ static constexpr char const *variable_names[NUM_GRCHOMBO_VARS] = {
     "phi",    "Pi"};
 
 static constexpr std::array<int, NUM_GRCHOMBO_VARS> const vars_parity = {
-    EVEN,   EVEN,   ODD_XY,  EVEN,   EVEN, EVEN,
-    ODD_XY,  EVEN,  EVEN, EVEN,  EVEN,   ODD_X, ODD_Y,
-    EVEN,   ODD_X,  ODD_Y,   ODD_X, ODD_Y,  EVEN,  EVEN};
+    EVEN,   
+    EVEN,   ODD_XY,  EVEN,   
+    EVEN,
+    EVEN, 
+    EVEN, ODD_XY, EVEN,
+    EVEN,
+    EVEN,  
+    ODD_X, ODD_Y,  
+    EVEN, 
+    ODD_X, ODD_Y,  
+    ODD_X, ODD_Y,  
+    EVEN,  EVEN};
 
 } // namespace GRChomboVariables
 

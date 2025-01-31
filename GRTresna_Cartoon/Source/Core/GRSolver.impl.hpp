@@ -187,19 +187,19 @@ void GRSolver<method_t, matter_t>::calculate_diagnostics(const int NL_iter)
         grids->compute_norm(diagnostic_vars, Interval(c_Ham, c_Ham));
     Real Mom_norm =
         grids->compute_norm(diagnostic_vars, Interval(c_Mom, c_Mom));
-    Real Ham_abs_norm =
-        grids->compute_norm(diagnostic_vars, Interval(c_Ham_abs, c_Ham_abs));
-    Real Mom_abs_norm =
-        grids->compute_norm(diagnostic_vars, Interval(c_Mom_abs, c_Mom_abs));
+   // Real Ham_abs_norm =
+   //     grids->compute_norm(diagnostic_vars, Interval(c_Ham_abs, c_Ham_abs));
+    //Real Mom_abs_norm =
+    //    grids->compute_norm(diagnostic_vars, Interval(c_Mom_abs, c_Mom_abs));
 
-    Ham_error = 100 * Ham_norm / Ham_abs_norm;
-    Mom_error = 100 * Mom_norm / Mom_abs_norm;
+    //Ham_error = 100 * Ham_norm / Ham_abs_norm;
+    //Mom_error = 100 * Mom_norm / Mom_abs_norm;
 
-    pout() << "The relative error of Ham before step " << NL_iter << " is "
-           << Ham_error << " %" << endl;
-    pout() << "The relative error of Mom before step " << NL_iter << " is "
-           << Mom_error << " %" << endl;
-    writeFile(params.base_params.error_filename, NL_iter, Ham_error, Mom_error);
+    pout() << " Ham before step " << NL_iter << " is "
+           << Ham_norm << " %" << endl;
+    pout() << " Mom before step " << NL_iter << " is "
+           << Mom_norm << " %" << endl;
+    writeFile(params.base_params.error_filename, NL_iter, Ham_norm, Mom_norm);
 }
 
 template <typename method_t, typename matter_t>

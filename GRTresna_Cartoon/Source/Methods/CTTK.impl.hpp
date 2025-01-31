@@ -67,26 +67,32 @@ void CTTK<matter_t>::solve_analytic(LevelData<FArrayBox> *a_multigrid_vars,
             RealVect loc;
             Grids::get_loc(loc, iv, a_dx, center);
 
+            int cartoon_idx = 1;
+            Real yy = loc[cartoon_idx];
+
             // Calculate the actual value of psi including BH part
             Real psi_reg = multigrid_vars_box(iv, c_psi_reg);
-            Real psi_bh = psi_and_Aij_functions->compute_bowenyork_psi(loc);
-            Real psi_0 = psi_reg + psi_bh;
+      //      Real psi_bh = psi_and_Aij_functions->compute_bowenyork_psi(loc);
+            Real psi_0 = psi_reg;
             Real laplacian_psi_reg;
             derivs.scalar_Laplacian(laplacian_psi_reg, iv, multigrid_vars_box,
                                     c_psi_reg);
+
+            Tensor<1, Real, SpaceDim> d1_psi_reg;
+            derivs.get_d1(d1_psi_reg, iv, multigrid_vars_box, c_psi_reg);
 
             // Assign values of Aij
             Tensor<2, Real> Aij_reg;
             psi_and_Aij_functions->compute_ctt_Aij(Aij_reg, multigrid_vars_box,
                                                    iv, a_dx, loc);
-            Tensor<2, Real> Aij_bh;
-            psi_and_Aij_functions->compute_bowenyork_Aij(Aij_bh, loc);
+          //  Tensor<2, Real> Aij_bh;
+          //  psi_and_Aij_functions->compute_bowenyork_Aij(Aij_bh, loc);
             // This is \bar  A_ij \bar A^ij
             Real A2_0 = 0.0;
             FOR2(i, j)
             {
-                A2_0 += (Aij_reg[i][j] + Aij_bh[i][j]) *
-                        (Aij_reg[i][j] + Aij_bh[i][j]);
+                A2_0 += (Aij_reg[i][j]  *
+                        Aij_reg[i][j] );
             }
 
             Real Aww_reg; // Cartoon term
@@ -103,7 +109,7 @@ void CTTK<matter_t>::solve_analytic(LevelData<FArrayBox> *a_multigrid_vars,
             Real K_0_squared =
                 24.0 * M_PI * G_Newton * emtensor.rho +
                 1.5 * A2_0 * pow(psi_0, -12.0) +
-                0.0 * 12.0 * laplacian_psi_reg * pow(psi_0, -5.0);
+                12.0 * (laplacian_psi_reg  + d1_psi_reg[1]/yy) * pow(psi_0, -5.0);
 
             // Set value for K
             // be careful if at a point K = 0, may have discontinuity
@@ -111,9 +117,9 @@ void CTTK<matter_t>::solve_analytic(LevelData<FArrayBox> *a_multigrid_vars,
                 m_method_params.sign_of_K * sqrt(K_0_squared);
 
             // set values for \bar Aij_0
-            multigrid_vars_box(iv, c_A11_0) = Aij_reg[0][0] + Aij_bh[0][0];
-            multigrid_vars_box(iv, c_A22_0) = Aij_reg[1][1] + Aij_bh[1][1];
-            multigrid_vars_box(iv, c_A12_0) = Aij_reg[0][1] + Aij_bh[0][1];
+            multigrid_vars_box(iv, c_A11_0) = Aij_reg[0][0];
+            multigrid_vars_box(iv, c_A22_0) = Aij_reg[1][1];
+            multigrid_vars_box(iv, c_A12_0) = Aij_reg[0][1];
 
             multigrid_vars_box(iv, c_Aww_0) = Aww_reg;
 
@@ -170,8 +176,8 @@ void CTTK<matter_t>::set_elliptic_terms(
 
             // Calculate the actual value of psi including BH part
             Real psi_reg = multigrid_vars_box(iv, c_psi_reg);
-            Real psi_bh = psi_and_Aij_functions->compute_bowenyork_psi(loc);
-            Real psi_0 = psi_reg + psi_bh;
+        //    Real psi_bh = psi_and_Aij_functions->compute_bowenyork_psi(loc);
+            Real psi_0 = psi_reg;
             Real laplacian_psi_reg;
             derivs.scalar_Laplacian(laplacian_psi_reg, iv, multigrid_vars_box,
                                     c_psi_reg);
@@ -180,14 +186,14 @@ void CTTK<matter_t>::set_elliptic_terms(
             Tensor<2, Real> Aij_reg;
             psi_and_Aij_functions->compute_ctt_Aij(Aij_reg, multigrid_vars_box,
                                                    iv, a_dx, loc);
-            Tensor<2, Real> Aij_bh;
-            psi_and_Aij_functions->compute_bowenyork_Aij(Aij_bh, loc);
+   //         Tensor<2, Real> Aij_bh;
+     //       psi_and_Aij_functions->compute_bowenyork_Aij(Aij_bh, loc);
             // This is \bar  A_ij \bar A^ij
             Real A2_0 = 0.0;
             FOR2(i, j)
             {
-                A2_0 += (Aij_reg[i][j] + Aij_bh[i][j]) *
-                        (Aij_reg[i][j] + Aij_bh[i][j]);
+                A2_0 += (Aij_reg[i][j]  *
+                        Aij_reg[i][j]);
             }
 
             Real Aww_reg; // Cartoon term
@@ -252,7 +258,7 @@ void CTTK<matter_t>::set_elliptic_terms(
                                      + (multigrid_vars_box(iv, c_V2_0) / yy*yy);
                 rhs_box(iv, c_U) += -laplacian_U -d1_U[cartoon_idx] / yy;
             }
-            aCoef_box(iv, c_V2) += -1.0 / pow(yy, 2.0);
+            aCoef_box(iv, c_V2) -= 1.0 / pow(yy, 2.0);
 
             cCoef_box(iv, c_V1) += 1.0 / yy;
             cCoef_box(iv, c_V2) += 1.0 / yy;

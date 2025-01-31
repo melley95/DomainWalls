@@ -125,7 +125,7 @@ void SimulationParameters<method_t, matter_t>::read_base_params(GRParmParse &pp)
     else
     {
         base_params.output_filename =
-            base_params.output_path + "InitialDataFinal.3d.hdf5";
+            base_params.output_path + "InitialDataFinal.2d.hdf5";
     }
 
     pp.load("G_Newton", base_params.G_Newton, 1.0);
