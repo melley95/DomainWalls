@@ -5,12 +5,8 @@ ifndef CHOMBO_HOME
     $(error Please define CHOMBO_HOME - see installation instructions.)
 endif
 
-
-
 # trace the chain of included makefiles
 makefiles += releasedExamples_AMRPoisson_execVariableCoefficient
-
-DIM = 2
 
 ## Define the variables needed by Make.example
 
@@ -36,9 +32,7 @@ src_dirs := ../../Source \
             ../../Source/Variables \
             ../../Source/TaggingCriteria \
 	          ../../Source/Operator \
-            ../../Source/Operator/SolverOperator \
-            $(PETSC_DIR)/$(PETSC_ARCH)/include \
-	        $(PETSC_DIR)/include
+            ../../Source/Operator/SolverOperator 
 
 # shared code for building example programs
 include $(CHOMBO_HOME)/mk/Make.example

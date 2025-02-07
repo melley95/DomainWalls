@@ -35,14 +35,17 @@ class SimulationParameters : public SimulationParametersBase
                 0.0); // for now the example neglects backreaction
       
         pp.load("R0", initial_params.R0, 10.0);
-        pp.load("sf_eta", initial_params.eta, 0.0);
-        pp.load("sf_lambda", initial_params.lambda, 0.0);
+        pp.load("sf_eta", pot_params.eta, 0.0);
+        pp.load("sf_lambda", pot_params.lambda, 0.0);
 
         pp.load("eps1", initial_params.eps1, 1.0);
         pp.load("eps2", initial_params.eps2, 1.0);
         
-        pot_params.eta = initial_params.eta;
-        pot_params.lambda = initial_params.lambda;
+
+        initial_params.eta = pot_params.eta;
+        initial_params.lambda = pot_params.lambda;
+
+       
 
         pp.load("thresh_phi", threshold_phi, 0.0);
         pp.load("thresh_K", threshold_K, 0.0);
