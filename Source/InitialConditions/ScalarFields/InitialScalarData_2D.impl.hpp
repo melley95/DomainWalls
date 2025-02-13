@@ -41,16 +41,16 @@ void InitialScalarData_2D::compute(Cell<data_t> current_cell) const
 
     data_t R;
 
-    R = m_init_SF_params.R0/sqrt(cos2phi+pow(m_init_SF_params.eps1, -2)*sin2phi);
+    //R = m_init_SF_params.R0/sqrt(cos2phi+pow(m_init_SF_params.eps1, -2)*sin2phi);
 
-   // Real a = 35.0;
-    // Real b = 70.0;
+    data_t a = m_init_SF_params.a;
+    data_t b = m_init_SF_params.b;
 
-     //R = (a*b)/(a*x/sqrt(x*x+y*y)+b*y/sqrt(x*x+y*y));
+     R = (a*b)/sqrt((a*a*x*x + b*b*y*y)/(x*x + y*y));
 
     // data_t phi = tanh((sqrt(x*x+y*y)-R)/sqrt(2.0));
 
-    data_t phi = m_init_SF_params.eta*tanh(sqrt(2.0*m_init_SF_params.lambda)*m_init_SF_params.eta*(sqrt(r2)-R)/2.0);
+    data_t phi = m_init_SF_params.eta*tanh(sqrt(0.5*m_init_SF_params.lambda)*m_init_SF_params.eta*(sqrt(r2)-R));
 
     data_t Pi = 0;
 

@@ -47,10 +47,10 @@ class SimulationParameters : public SimulationParametersBase
 
         // Initial data InitialScalarData_2D
         // pp.load("sf_phi0", init_SF_params.phi0, .1);
-        pp.load("sf_eta", init_SF_params.eta, 0.0);
+        pp.load("a", init_SF_params.a, 0.0);
+        pp.load("b", init_SF_params.b, 0.0);
         pp.load("lambda", init_SF_params.lambda, 0.0);
-        pp.load("R0", init_SF_params.R0, 10.0);
-        pp.load("eps1", init_SF_params.eps1, 1.0);
+        pp.load("sf_eta", init_SF_params.eta, 0.0);
         pp.load("center_SF", init_SF_params.centerSF, center);
 
         // Potential params

@@ -28,10 +28,9 @@ class Spheroid
             center;   //!< Centre of sphere
         double eta;
         double lambda;
-        double R0;
+        double a;
+        double b; 
 
-        double eps1;
-        double eps2;
        
 
     };
@@ -63,25 +62,24 @@ class Spheroid
 {
     
     
+    double aa = m_params.a*m_params.a;
+    double bb = m_params.b*m_params.b;
+
     data_t x = coords.x;
     data_t y = coords.y;
     data_t z = coords.z;
 
-    data_t rho2 = simd_max(x*x + y*y + z*z,1e-12);
-    data_t r2 = simd_max(x*x + y*y, 1e-12);
+    data_t rho2 = simd_max(x*x + y*y + z*z, 1e-12);
+    data_t r2 = simd_max(y*y + z*z, 1e-12);
 
-    data_t cos2phi = x*x/r2;
-    data_t sin2phi = y*y/r2;
-    data_t sin2theta = r2/ rho2;
-    data_t cos2theta = z*z / rho2;
 
     data_t R;
 
-    R = m_params.R0/sqrt((cos2phi+pow(m_params.eps1, -2)*sin2phi)*sin2theta+pow(m_params.eps2,-2)*cos2theta);
+    R = (m_params.a*m_params.b)/sqrt((aa*x*x + bb*r2)/(x*x + r2));
 
     //data_t rho = sqrt((m_params.a*m_params.a)*x*x+(m_params.b*m_params.b)*y*y+(m_params.c*m_params.c)*z*z);
    // data_t out_phi = m_params.eta*tanh(sqrt(2.0*m_params.lambda)*m_params.eta*(sqrt(rho2)-m_params.R0)/2.0);
-    data_t out_phi = m_params.eta*tanh(sqrt(2.0*m_params.lambda)*m_params.eta*(sqrt(rho2)-R)/2.0);
+    data_t out_phi = m_params.eta*tanh(sqrt(0.5*m_params.lambda)*m_params.eta*(sqrt(rho2)-R));
 
     return out_phi;
 }

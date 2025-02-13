@@ -28,8 +28,8 @@ class InitialScalarData_2D
     {
         double eta;
         double lambda;
-        double R0;
-        double eps1;
+        double a;
+        double b;
         std::array<double, CH_SPACEDIM>
             centerSF;
   
