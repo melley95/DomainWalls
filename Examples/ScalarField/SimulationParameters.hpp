@@ -38,8 +38,8 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("sf_eta", pot_params.eta, 0.0);
         pp.load("sf_lambda", pot_params.lambda, 0.0);
 
-        pp.load("a", initial_params.a, 1.0);
-        pp.load("b", initial_params.b, 1.0);
+        pp.load("R0", initial_params.a, 1.0);
+        pp.load("e", initial_params.e, 1.0);
         
 
         initial_params.eta = pot_params.eta;
@@ -49,6 +49,7 @@ class SimulationParameters : public SimulationParametersBase
 
         pp.load("thresh_phi", threshold_phi, 0.0);
         pp.load("thresh_K", threshold_K, 0.0);
+        pp.load("r_limit", r_limit, 0.0);
 
         pp.load("activate_extraction", activate_extraction, false);
 
@@ -77,6 +78,8 @@ class SimulationParameters : public SimulationParametersBase
     
     double threshold_phi;
     double threshold_K; 
+
+    double r_limit;
 
     bool activate_extraction , calc_weyl, calculate_constraint_norms;
 

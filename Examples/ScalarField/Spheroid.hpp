@@ -29,7 +29,7 @@ class Spheroid
         double eta;
         double lambda;
         double a;
-        double b; 
+        double e; 
 
        
 
@@ -62,20 +62,20 @@ class Spheroid
 {
     
     
-    double aa = m_params.a*m_params.a;
-    double bb = m_params.b*m_params.b;
+    double a = m_params.a;
+    double b = 1.0/sqrt(1.0 - pow(m_params.e, 2.0));
 
     data_t x = coords.x;
     data_t y = coords.y;
     data_t z = coords.z;
 
     data_t rho2 = simd_max(x*x + y*y + z*z, 1e-12);
-    data_t r2 = simd_max(y*y + z*z, 1e-12);
+   
 
 
     data_t R;
 
-    R = (m_params.a*m_params.b)/sqrt((aa*x*x + bb*r2)/(x*x + r2));
+    R = (a*b)/sqrt((a*a*x*x + b*b*y*y + a*a*z*z)/(rho2));
 
     //data_t rho = sqrt((m_params.a*m_params.a)*x*x+(m_params.b*m_params.b)*y*y+(m_params.c*m_params.c)*z*z);
    // data_t out_phi = m_params.eta*tanh(sqrt(2.0*m_params.lambda)*m_params.eta*(sqrt(rho2)-m_params.R0)/2.0);

@@ -11,7 +11,7 @@
 #include "CCZ4Cartoon.hpp"
 #include "ComputePack.hpp"
 #include "ConstraintsCartoon.hpp"
-#include "MovingPunctureGauge.hpp"
+#include "MovingPunctureGaugeSA.hpp"
 #include "NanCheck.hpp"
 #include "PositiveChiAndAlpha.hpp"
 #include "SetValue.hpp"
@@ -98,7 +98,7 @@ void ScalarField2DLevel::specificEvalRHS(GRLevelData &a_soln,
     // Calculate CCZ4 right hand side
     Potential potential(m_p.potential_params);
     BoxLoops::loop(
-        CCZ4Cartoon<MovingPunctureGauge, FourthOrderDerivatives, Potential>(
+        CCZ4Cartoon<MovingPunctureGaugeSA, FourthOrderDerivatives, Potential>(
             m_p.ccz4_params, m_dx, m_p.sigma, potential, m_p.m_G_Newton,
             m_p.formulation),
         a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
@@ -122,7 +122,7 @@ void ScalarField2DLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
 {
 
     BoxLoops::loop(
-        PhiAndKExtractionTaggingCriterion(m_dx, m_p.threshold_phi, m_p.threshold_K, m_level, m_p.extraction_params, m_p.activate_extraction),
+        PhiAndKExtractionTaggingCriterion(m_dx, m_p.threshold_phi, m_p.threshold_K, m_p.r_limit, m_level, m_p.extraction_params, m_p.activate_extraction),
         current_state, tagging_criterion);
 
 

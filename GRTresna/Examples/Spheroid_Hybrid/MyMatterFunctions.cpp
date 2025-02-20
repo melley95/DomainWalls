@@ -5,14 +5,18 @@ Real ScalarField::my_potential_function(const Real &phi_here) const
 }
 Real ScalarField::my_phi_function(const RealVect &loc) const
 {
-    Real rho2 = max(loc[0] * loc[0] + loc[1] * loc[1] + loc[2] * loc[2],1e-12);
-    Real r2 = max(loc[0] * loc[0] + loc[1] * loc[1], 1e-12);
-    Real cos2phi = (loc[1] * loc[1])/r2;
-    Real sin2phi = (loc[0] * loc[0])/r2;
-    Real sin2theta = r2/ rho2;
-    Real cos2theta = loc[2] * loc[2] / rho2;
-    Real R = m_matter_params.R0/sqrt((cos2phi+pow(m_matter_params.eps1, -2)*sin2phi)*sin2theta+cos2theta);
-    return m_matter_params.eta*tanh(sqrt(2.0*m_matter_params.lambda)*m_matter_params.eta*(sqrt(rho2)-R)/2.0);
+    Real r2 = max(loc[0] * loc[0] + loc[1] * loc[1] + loc[2] * loc[2], 1e-12);
+
+    Real x = loc[0];
+    Real y = loc[1];
+    Real z = loc[2];
+
+    Real a = m_matter_params.a;
+    Real b = 1.0/sqrt(1.0 - pow(m_matter_params.e, 2.0));
+
+    Real R = (a*b)/sqrt((a*a*x*x + b*b*y*y + a*a*z*z)/r2);
+
+    return m_matter_params.eta*tanh(sqrt(0.5*m_matter_params.lambda)*m_matter_params.eta*(sqrt(r2)-R));
 }
 Real ScalarField::my_Pi_function(const RealVect &loc) const
 {

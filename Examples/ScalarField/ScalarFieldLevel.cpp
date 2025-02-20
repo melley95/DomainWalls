@@ -150,7 +150,7 @@ void ScalarFieldLevel::computeTaggingCriterion(
     const FArrayBox &current_state_diagnostics)
 {
     BoxLoops::loop(
-        PhiAndKExtractionTaggingCriterion(m_dx, m_p.threshold_phi, m_p.threshold_K, m_level, m_p.scalar_extraction_params, m_p.activate_extraction),
+        PhiAndKExtractionTaggingCriterion(m_dx, m_p.threshold_phi, m_p.threshold_K, m_p.r_limit, m_level, m_p.scalar_extraction_params, m_p.activate_extraction),
         current_state, tagging_criterion);
 }
 void ScalarFieldLevel::specificPostTimeStep()

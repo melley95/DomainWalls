@@ -19,6 +19,7 @@ class PhiAndKExtractionTaggingCriterion
     const FourthOrderDerivatives m_deriv;
     const double m_threshold_phi;
     const double m_threshold_K;
+    const double m_r_limit; // Max radius for refinement
 
     const spherical_extraction_params_t m_params;
     const int m_level;
@@ -26,11 +27,11 @@ class PhiAndKExtractionTaggingCriterion
 
 
   public:
-    PhiAndKExtractionTaggingCriterion(double dx, double threshold_phi, double threshold_K, const int a_level, 
+    PhiAndKExtractionTaggingCriterion(double dx, double threshold_phi, double threshold_K, double r_limit, const int a_level, 
                             const spherical_extraction_params_t a_params,
                             const bool activate_extraction = false)
      : m_dx(dx), m_deriv(dx), m_threshold_phi(threshold_phi),
-       m_threshold_K(threshold_K), m_level(a_level), m_params(a_params), 
+       m_threshold_K(threshold_K), m_r_limit(r_limit), m_level(a_level), m_params(a_params), 
        m_activate_extraction(activate_extraction){};
 
     template <class data_t> void compute(Cell<data_t> current_cell) const
@@ -51,6 +52,19 @@ class PhiAndKExtractionTaggingCriterion
 
         data_t criterion = m_dx * (sqrt(mod_d1_phi) / m_threshold_phi +
                                    sqrt(mod_d1_K) / m_threshold_K);
+
+
+        const Coordinates<double> coords(current_cell, m_dx, m_params.center);
+
+
+        //double radius = Coordinates<double>::get_radius(
+ 
+        
+
+        if (coords.y > m_r_limit)
+        {
+            criterion = 0.0;
+        }
 
 
         if (m_activate_extraction)

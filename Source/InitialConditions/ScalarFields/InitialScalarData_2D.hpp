@@ -29,7 +29,7 @@ class InitialScalarData_2D
         double eta;
         double lambda;
         double a;
-        double b;
+        double e;
         std::array<double, CH_SPACEDIM>
             centerSF;
   

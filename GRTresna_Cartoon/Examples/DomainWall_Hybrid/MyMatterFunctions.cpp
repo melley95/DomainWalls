@@ -9,12 +9,15 @@ Real ScalarField::my_phi_function(const RealVect &loc) const
 {
     Real r2 = max(loc[0] * loc[0] + loc[1] * loc[1], 1e-12);
 
-    Real cos2phi = (loc[1] * loc[1])/r2;
-    Real sin2phi = (loc[0] * loc[0])/r2;
+    Real x = loc[0];
+    Real y = loc[1];
 
-    Real R = m_matter_params.R0/sqrt(cos2phi+pow(m_matter_params.eps1, -2)*sin2phi);
+    Real a = m_matter_params.a;
+    Real b = 1.0/sqrt(1.0 - pow(m_matter_params.e, 2.0));
 
-    return m_matter_params.eta*tanh(sqrt(2.0*m_matter_params.lambda)*m_matter_params.eta*(sqrt(r2)-R)/2.0);
+    Real R = (a*b)/sqrt((a*a*x*x + b*b*y*y)/r2);
+
+    return m_matter_params.eta*tanh(sqrt(0.5*m_matter_params.lambda)*m_matter_params.eta*(sqrt(r2)-R));
 }
 
 Real ScalarField::my_Pi_function(const RealVect &loc) const

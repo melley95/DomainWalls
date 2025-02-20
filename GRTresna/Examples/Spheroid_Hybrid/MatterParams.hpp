@@ -7,16 +7,16 @@ struct params_t
 {
     Real lambda;
     Real eta;
-    Real R0;
-    Real eps1;
+    Real a;
+    Real e;
  
 };
 inline void read_params(GRParmParse &pp, params_t &matter_params)
 {
     pp.get("eta", matter_params.eta);
     pp.get("lambda", matter_params.lambda);
-    pp.get("R0", matter_params.R0);
-    pp.get("eps1", matter_params.eps1);
+    pp.get("R0", matter_params.a);
+    pp.get("e", matter_params.e);
 }
 }; // namespace MatterParams
 #endif
