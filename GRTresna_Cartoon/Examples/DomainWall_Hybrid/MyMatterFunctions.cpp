@@ -13,7 +13,7 @@ Real ScalarField::my_phi_function(const RealVect &loc) const
     Real y = loc[1];
 
     Real a = m_matter_params.a;
-    Real b = 1.0/sqrt(1.0 - pow(m_matter_params.e, 2.0));
+    Real b = a/sqrt(1.0 - pow(m_matter_params.e, 2.0));
 
     Real R = (a*b)/sqrt((a*a*x*x + b*b*y*y)/r2);
 
