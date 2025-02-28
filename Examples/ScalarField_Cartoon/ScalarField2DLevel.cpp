@@ -11,7 +11,7 @@
 #include "CCZ4Cartoon.hpp"
 #include "ComputePack.hpp"
 #include "ConstraintsCartoon.hpp"
-#include "MovingPunctureGaugeSA.hpp"
+#include "MovingPunctureGauge.hpp"
 #include "NanCheck.hpp"
 #include "PositiveChiAndAlpha.hpp"
 #include "SetValue.hpp"
@@ -52,24 +52,12 @@ void ScalarField2DLevel::initialData()
     if (m_verbosity)
         pout() << "ScalarField2DLevel::initialData " << m_level << endl;
 
-    // When changing class here, don't forget to change potential if necessary
-    // double spacing = .01;
-    // Oscilloton oscilloton(m_p.oscilloton_params, m_dx, spacing);
-    // BoxLoops::loop(make_compute_pack(SetValue(0.0), oscilloton), m_state_new,
-    //                m_state_new, INCLUDE_GHOST_CELLS, disable_simd());
-
-    // When changing class here, don't forget to change potential if necessary
+    
     InitialScalarData_2D initialscalardata_2D(m_p.init_SF_params, m_dx);
     BoxLoops::loop(make_compute_pack(SetValue(0.0), initialscalardata_2D),
                    m_state_new, m_state_new, INCLUDE_GHOST_CELLS,
                    disable_simd());
 
-    // When changing class here, don't forget to change potential if necessary
-    // ScalarBubble_2D scalarbubble2D(m_p.bubble_params, m_p.potential_params,
-    //                                m_dx);
-    // BoxLoops::loop(make_compute_pack(SetValue(0.0), scalarbubble2D),
-    //                m_state_new, m_state_new, INCLUDE_GHOST_CELLS,
-    //                disable_simd());
 
     fillAllGhosts();
 
@@ -98,7 +86,7 @@ void ScalarField2DLevel::specificEvalRHS(GRLevelData &a_soln,
     // Calculate CCZ4 right hand side
     Potential potential(m_p.potential_params);
     BoxLoops::loop(
-        CCZ4Cartoon<MovingPunctureGaugeSA, FourthOrderDerivatives, Potential>(
+        CCZ4Cartoon<MovingPunctureGauge, FourthOrderDerivatives, Potential>(
             m_p.ccz4_params, m_dx, m_p.sigma, potential, m_p.m_G_Newton,
             m_p.formulation),
         a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
@@ -152,8 +140,8 @@ void ScalarField2DLevel::specificPostTimeStep()
         {
             bool first_step = (m_time == 0.);
             AMRReductions<VariableType::diagnostic> amr_reductions(m_bh_amr);
-            double L2_Ham = amr_reductions.sum(c_Ham);
-            double L2_Mom = amr_reductions.sum(Interval(c_Mom, c_Mom));
+            double L2_Ham = amr_reductions.norm(c_Ham);
+            double L2_Mom = amr_reductions.norm(Interval(c_Mom, c_Mom));
             SmallDataIO constraints_file(m_p.data_path + "constraint_norms",
                                          m_dt, m_time, m_restart_time,
                                          SmallDataIO::APPEND, first_step);
@@ -196,7 +184,30 @@ void ScalarField2DLevel::specificPostTimeStep()
 
     if (m_p.activate_extraction == 1)
     {
-        // Deleted Thomas' ADM extraction code for now, still available in
-        // previous commits.
+        int weyl_min_level = m_p.extraction_params.min_extraction_level();
+        bool calculate_weyl = at_level_timestep_multiple(weyl_min_level);
+
+        if (calculate_weyl)
+        {
+            // Populate the Weyl Scalar values on the grid
+            fillAllGhosts();
+
+            BoxLoops::loop(WeylOmScalar(m_p.extraction_params.center, m_dx),
+                           m_state_new, m_state_diagnostics,
+                           EXCLUDE_GHOST_CELLS);
+
+            // Do the extraction on the min extraction level
+            if (m_level == weyl_min_level)
+            {
+                CH_TIME("WeylExtraction");
+                // Now refresh the interpolator and do the interpolation
+                m_bh_amr.m_interpolator->refresh();
+                WeylExtraction weyl_extraction(m_p.extraction_params, m_dt,
+                                               m_time, first_step,
+                                               m_restart_time);
+                weyl_extraction.execute_query(m_bh_amr.m_interpolator);
+            }
+        }
+
     }
 }

@@ -63,12 +63,12 @@ template <VariableType var_t> class AMRReductions
     //! returns the volume-weighted p-norm of an interval of variables
     //! p = a_norm_exponent
     Real norm(const Interval &a_vars, const int a_norm_exponent = 2,
-              const bool a_normalize_by_volume = false) const;
+              const bool a_normalize_by_volume = true) const;
 
     //! returns the volume weighted p-norm of a single variable
     //! p = a_norm_exponent
     Real norm(const int a_var, const int a_norm_exponent = 2,
-              const bool a_normalize_by_volume = false) const;
+              const bool a_normalize_by_volume = true) const;
 
     //! returns the volume-weighted sum (integral) of an interval of variables
     Real sum(const Interval &a_vars) const;

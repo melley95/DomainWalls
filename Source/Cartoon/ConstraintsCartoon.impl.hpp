@@ -69,7 +69,7 @@ void Constraints<potential_t>::compute(Cell<data_t> current_cell) const
 template <class potential_t>
 template <class data_t, template <typename> class vars_t,
           template <typename> class diff2_vars_t>
-Constraints<potential_t>::constraints_t<data_t>
+typename Constraints<potential_t>::template constraints_t<data_t>
 Constraints<potential_t>::constraint_equations(
     const vars_t<data_t> &vars, const vars_t<Tensor<1, data_t>> &d1,
     const diff2_vars_t<Tensor<2, data_t>> &d2,
