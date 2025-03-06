@@ -11,7 +11,7 @@
 #include "CCZ4Cartoon.hpp"
 #include "ComputePack.hpp"
 #include "ConstraintsCartoon.hpp"
-#include "MovingPunctureGauge.hpp"
+#include "MovingPunctureGaugeSA.hpp"
 #include "NanCheck.hpp"
 #include "PositiveChiAndAlpha.hpp"
 #include "SetValue.hpp"
@@ -31,6 +31,8 @@
 #include "ADMQuantities.hpp"
 #include "ADMQuantitiesExtraction.hpp"
 #include "GammaCartoonCalculator.hpp"
+
+#include "MatterEnergy.hpp"
 
 void ScalarField2DLevel::specificAdvance()
 {
@@ -86,7 +88,7 @@ void ScalarField2DLevel::specificEvalRHS(GRLevelData &a_soln,
     // Calculate CCZ4 right hand side
     Potential potential(m_p.potential_params);
     BoxLoops::loop(
-        CCZ4Cartoon<MovingPunctureGauge, FourthOrderDerivatives, Potential>(
+        CCZ4Cartoon<MovingPunctureGaugeSA, FourthOrderDerivatives, Potential>(
             m_p.ccz4_params, m_dx, m_p.sigma, potential, m_p.m_G_Newton,
             m_p.formulation),
         a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
@@ -118,11 +120,13 @@ void ScalarField2DLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
 
 void ScalarField2DLevel::specificPostTimeStep()
 {
-    CH_TIME("ScalarField2DLevel::specificPostTimeStep");
+   
 
     bool first_step =
         (m_time == 0.); // this form is used when 'specificPostTimeStep' was
                         // called during setup at t=0 from Main
+
+                        bool fill_ghosts = false;
 
  #ifdef USE_AHFINDER
     // if print is on and there are Diagnostics to write, calculate them!
@@ -136,9 +140,12 @@ void ScalarField2DLevel::specificPostTimeStep()
         Potential potential(m_p.potential_params);
         BoxLoops::loop(Constraints<Potential>(m_dx, potential, m_p.m_G_Newton),
                        m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+        BoxLoops::loop(MatterEnergy<Potential>(potential, m_dx, m_p.center),
+                       m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
         if (m_level == 0)
         {
             bool first_step = (m_time == 0.);
+            m_bh_amr.m_interpolator->refresh(fill_ghosts);
             AMRReductions<VariableType::diagnostic> amr_reductions(m_bh_amr);
             double L2_Ham = amr_reductions.norm(c_Ham);
             double L2_Mom = amr_reductions.norm(Interval(c_Mom, c_Mom));
@@ -151,36 +158,27 @@ void ScalarField2DLevel::specificPostTimeStep()
                 constraints_file.write_header_line({"L^2_Ham", "L^2_Mom"});
             }
             constraints_file.write_time_data_line({L2_Ham, L2_Mom});
+
+            double rho_sum = amr_reductions.sum(c_rhoLL);
+            double source_sum = amr_reductions.sum(c_source);
+            SmallDataIO integral_file(m_p.data_path + "volume_ints", m_dt, m_time,
+            m_restart_time, SmallDataIO::APPEND,
+            first_step);
+
+            integral_file.remove_duplicate_time_data();
+            std::vector<double> data_for_writing = {rho_sum, source_sum};
+            // write data
+            if (first_step)
+            {
+                integral_file.write_header_line({"rho", "source"});
+            }
+            integral_file.write_time_data_line(data_for_writing);
+
+            
         }
     }
 
-    int adm_min_level = 0;
-    bool calculate_adm = at_level_timestep_multiple(adm_min_level);
-    if (calculate_adm)
-    {
-        Potential potential(m_p.potential_params);
-        if (!m_p.calculate_constraint_norms)
-        {
-            fillAllGhosts();
-            BoxLoops::loop(
-                Constraints<Potential>(m_dx, potential, m_p.m_G_Newton),
-                m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
-        }
-        if (m_level == 0)
-        {
-            AMRReductions<VariableType::diagnostic> amr_reductions(m_bh_amr);
-            double M_ADM = amr_reductions.sum(c_rho_ADM);
-            SmallDataIO M_ADM_file(m_p.data_path + "M_ADM", m_dt, m_time,
-                                   m_restart_time, SmallDataIO::APPEND,
-                                   first_step);
-            M_ADM_file.remove_duplicate_time_data();
-            if (first_step)
-            {
-                M_ADM_file.write_header_line({"M_ADM"});
-            }
-            M_ADM_file.write_time_data_line({M_ADM});
-        }
-    }
+   
 
     if (m_p.activate_extraction == 1)
     {

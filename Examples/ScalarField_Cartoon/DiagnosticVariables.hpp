@@ -24,10 +24,12 @@ enum
     c_Padm,
 
     c_rho,
-    c_rho_ADM, // basically rho * sqrt(gamma)
 
     c_Sx,
     c_Sy,
+
+    c_rhoLL,
+    c_source,
 
     // c_Sxx,
     // c_Sxy,
@@ -56,7 +58,10 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
 
     "M_adm",    "P_adm",
 
-    "rho",      "rho_ADM",  "Sx",  "Sy"};
+    "rho",  "Sx",  "Sy",
+
+     "rhoLL", "source"
+        };
 // "Sxx",    "Sxy",    "Syy",
 // "Sww",      "S",        "Sxx_TF", "Sxy_TF", "Syy_TF", "Sww_TF"
 } // namespace DiagnosticVariables

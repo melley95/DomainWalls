@@ -44,7 +44,7 @@ void InitialScalarData_2D::compute(Cell<data_t> current_cell) const
     //R = m_init_SF_params.R0/sqrt(cos2phi+pow(m_init_SF_params.eps1, -2)*sin2phi);
 
     data_t a = m_init_SF_params.a;
-    data_t b = 1.0/sqrt(1.0 - pow(m_init_SF_params.e, 2.0));
+    data_t b = a/sqrt(1.0 - pow(m_init_SF_params.e, 2.0));
 
      R = (a*b)/sqrt((a*a*x*x + b*b*y*y)/(x*x + y*y));
 

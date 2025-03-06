@@ -51,7 +51,7 @@ void Constraints<potential_t>::compute(Cell<data_t> current_cell) const
 
     current_cell.store_vars(out.Mom_abs, c_Mom);
     current_cell.store_vars(out.rho, c_rho);
-    current_cell.store_vars(out.rho_ADM, c_rho_ADM);
+   // current_cell.store_vars(out.rho_ADM, c_rho_ADM);
     current_cell.store_vars(out.Si[0], c_Sx);
     current_cell.store_vars(out.Si[1], c_Sy);
     // current_cell.store_vars(out.Sij[0][0], c_Sxx);
