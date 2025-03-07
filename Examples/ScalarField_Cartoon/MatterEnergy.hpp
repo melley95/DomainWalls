@@ -105,7 +105,7 @@ template <class potential_t> class MatterEnergy
         data_t sqrt_det_Sigma = area_element_sphere(spherical_gamma);
 */
         // calculate according to Landau Lifshitz method
-        data_t rho1 = emtensor.rho * det_gamma * 2.0 * sqrt(pow(coords.x, 2.0) + pow(coords.y, 2.0));
+        data_t rho1 = emtensor.rho * det_gamma * 8.0 * sqrt(pow(coords.x, 2.0) + pow(coords.y, 2.0));
 
   /*      // Energy flux
         data_t flux1 = 0.0;
@@ -144,7 +144,7 @@ template <class potential_t> class MatterEnergy
                 }
             }
         }
-        source1 *= det_gamma;
+        source1 *= det_gamma * 8.0 * sqrt(pow(coords.x, 2.0) + pow(coords.y, 2.0));
 
         // assign values of MatterEnergy in output box
         current_cell.store_vars(rho1, c_rhoLL);
