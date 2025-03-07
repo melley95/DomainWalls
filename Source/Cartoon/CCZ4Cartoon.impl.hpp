@@ -393,8 +393,8 @@ void CCZ4Cartoon<gauge_t, deriv_t, potential_t>::rhs_equation(
 
     // For matter fields
     rhs.phi = vars.lapse * vars.Pi + advec.phi;
-    rhs.Pi = vars.lapse * vars.K * vars.Pi + advec.Pi +
-             vars.lapse * vars.chi * h_UU_ww * d1.phi[dI] * one_over_cartoon_coord;
+    rhs.Pi = vars.lapse * vars.K * vars.Pi + advec.Pi
+             + vars.lapse * vars.chi * h_UU_ww * d1.phi[dI] * one_over_cartoon_coord;
 
     FOR(i, j)
     {
