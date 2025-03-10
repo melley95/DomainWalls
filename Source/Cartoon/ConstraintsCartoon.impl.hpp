@@ -54,10 +54,10 @@ void Constraints<potential_t>::compute(Cell<data_t> current_cell) const
    // current_cell.store_vars(out.rho_ADM, c_rho_ADM);
     current_cell.store_vars(out.Si[0], c_Sx);
     current_cell.store_vars(out.Si[1], c_Sy);
-    // current_cell.store_vars(out.Sij[0][0], c_Sxx);
-    // current_cell.store_vars(out.Sij[0][1], c_Sxy);
-    // current_cell.store_vars(out.Sij[1][1], c_Syy);
-    // current_cell.store_vars(out.Sww, c_Sww);
+    current_cell.store_vars(out.Sij[0][0], c_Sxx);
+    current_cell.store_vars(out.Sij[0][1], c_Sxy);
+    current_cell.store_vars(out.Sij[1][1], c_Syy);
+    current_cell.store_vars(out.Sww, c_Sww);
     // current_cell.store_vars(out.S, c_S);
 
     // current_cell.store_vars(out.Sij_TF[0][0], c_Sxx_TF);
@@ -170,6 +170,16 @@ Constraints<potential_t>::constraint_equations(
     {
         out.Si[i] = emtensor.Si[i];
     }
+
+    FOR(i, j)
+    {
+
+        out.Sij[i][j] = emtensor.Sij[i][j];
+    }
+
+    out.Sww = emtensor.Sww;
+
+
 
     return out;
 }

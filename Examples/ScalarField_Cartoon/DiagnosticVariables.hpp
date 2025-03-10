@@ -20,8 +20,8 @@ enum
     c_Weyl4_Re,
     c_Weyl4_Im,
 
-    c_Madm,
-    c_Padm,
+   // c_Madm,
+  //  c_Padm,
 
     c_rho,
 
@@ -31,11 +31,11 @@ enum
     c_rhoLL,
     c_source,
 
-    // c_Sxx,
-    // c_Sxy,
-    // c_Syy,
+    c_Sxx,
+    c_Sxy,
+    c_Syy,
 
-    // c_Sww,
+    c_Sww,
 
     // c_S,
 
@@ -56,14 +56,16 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
 
     "Weyl4_Re", "Weyl4_Im",
 
-    "M_adm",    "P_adm",
+ //   "M_adm",    "P_adm",
 
     "rho",  "Sx",  "Sy",
 
-     "rhoLL", "source"
-        };
-// "Sxx",    "Sxy",    "Syy",
-// "Sww",      "S",        "Sxx_TF", "Sxy_TF", "Syy_TF", "Sww_TF"
+     "rhoLL", "source", 
+     
+     "Sxx",    "Sxy",    "Syy",
+     
+     "Sww"};     
+// "S",        "Sxx_TF", "Sxy_TF", "Syy_TF", "Sww_TF"
 } // namespace DiagnosticVariables
 
 #endif /* DIAGNOSTICVARIABLES_HPP */

@@ -69,7 +69,7 @@ template <class potential_t> class MatterEnergy
 
         emtensorCartoon_t<data_t> emtensor = compute_SF_EM_tensor(vars, d1, h_UU, h_UU_ww, chris, nS, V_of_phi); 
             
-        const data_t det_gamma = pow(vars.chi, -3.0);
+        const data_t det_gamma = pow(vars.chi, -3.0) * 8.0 * sqrt(pow(coords.x, 2.0) + pow(coords.y, 2.0));
         Tensor<2, data_t> vars_gamma, vars_K_tensor;
         const data_t vars_K_ww = 1.0 / vars.chi * (vars.Aww + 1.0 / 3.0 * vars.hww * vars.K);
         FOR2(i, j)
@@ -105,7 +105,7 @@ template <class potential_t> class MatterEnergy
         data_t sqrt_det_Sigma = area_element_sphere(spherical_gamma);
 */
         // calculate according to Landau Lifshitz method
-        data_t rho1 = emtensor.rho * det_gamma * 8.0 * sqrt(pow(coords.x, 2.0) + pow(coords.y, 2.0));
+        data_t rho1 = emtensor.rho * det_gamma;
 
   /*      // Energy flux
         data_t flux1 = 0.0;
@@ -121,7 +121,7 @@ template <class potential_t> class MatterEnergy
         flux1 *= det_gamma;
 */
         // calculate the E source
-        data_t source1 = -emtensor.rho * vars.lapse * vars.K + vars.lapse * vars_K_ww * emtensor.Sww * gamma_UU_ww * gamma_UU_ww  + emtensor.rho * vars.shift[1]/cartoon_coord;
+        data_t source1 = -emtensor.rho * vars.lapse * vars.K +  emtensor.rho * vars.shift[1]/cartoon_coord + vars.lapse * vars_K_ww * emtensor.Sww * gamma_UU_ww * gamma_UU_ww;
         FOR1(i)
         {
             source1 += d1.shift[i][i] * emtensor.rho;
@@ -144,7 +144,7 @@ template <class potential_t> class MatterEnergy
                 }
             }
         }
-        source1 *= det_gamma * 8.0 * sqrt(pow(coords.x, 2.0) + pow(coords.y, 2.0));
+        source1 *= det_gamma;
 
         // assign values of MatterEnergy in output box
         current_cell.store_vars(rho1, c_rhoLL);
