@@ -56,7 +56,7 @@ compute_SF_EM_tensor(const vars_t<data_t> &vars,
     }
 
     // Sww
-    out.Sww = 0.5 * vars.hww * vars.Pi * vars.Pi / vars.chi;
+    out.Sww = -0.5 * vars.hww * Vt / vars.chi;
 
     // S
     out.S = TensorAlgebra::compute_trace(out.Sij, h_UU);

@@ -125,42 +125,29 @@ void ScalarField2DLevel::specificPostTimeStep()
     bool first_step =
         (m_time == 0.); // this form is used when 'specificPostTimeStep' was
                         // called during setup at t=0 from Main
+    int min_level = 0;
+    bool fill_ghosts = false;
+    bool calculate_min_level = at_level_timestep_multiple(min_level);
 
-                        bool fill_ghosts = false;
 
- #ifdef USE_AHFINDER
-    // if print is on and there are Diagnostics to write, calculate them!
-    if (m_p.AH_activate && m_level == m_p.AH_params.level_to_run)
-        m_bh_amr.m_ah_finder.solve(m_dt, m_time, m_restart_time);
- #endif
 
-    if (m_p.calculate_constraint_norms)
+    if (calculate_min_level)
     {
         fillAllGhosts();
         Potential potential(m_p.potential_params);
         BoxLoops::loop(Constraints<Potential>(m_dx, potential, m_p.m_G_Newton),
-                       m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+        m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
         BoxLoops::loop(MatterEnergy<Potential>(potential, m_dx, m_p.center),
                        m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
-        if (m_level == 0)
+        if (m_level == min_level)
         {
-            bool first_step = (m_time == 0.);
+      
             m_bh_amr.m_interpolator->refresh(fill_ghosts);
+            
             AMRReductions<VariableType::diagnostic> amr_reductions(m_bh_amr);
-            double L2_Ham = amr_reductions.norm(c_Ham);
-            double L2_Mom = amr_reductions.norm(Interval(c_Mom, c_Mom));
-            SmallDataIO constraints_file(m_p.data_path + "constraint_norms",
-                                         m_dt, m_time, m_restart_time,
-                                         SmallDataIO::APPEND, first_step);
-            constraints_file.remove_duplicate_time_data();
-            if (first_step)
-            {
-                constraints_file.write_header_line({"L^2_Ham", "L^2_Mom"});
-            }
-            constraints_file.write_time_data_line({L2_Ham, L2_Mom});
-
             double rho_sum = amr_reductions.sum(c_rhoLL);
             double source_sum = amr_reductions.sum(c_source);
+            
             SmallDataIO integral_file(m_p.data_path + "volume_ints", m_dt, m_time,
             m_restart_time, SmallDataIO::APPEND,
             first_step);
@@ -174,13 +161,51 @@ void ScalarField2DLevel::specificPostTimeStep()
             }
             integral_file.write_time_data_line(data_for_writing);
 
-            
         }
     }
 
+            if (m_p.calculate_constraint_norms){
+
+                fillAllGhosts();
+                Potential potential(m_p.potential_params);
+                BoxLoops::loop(Constraints<Potential>(m_dx, potential, m_p.m_G_Newton),
+                m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+
+                if (m_level == 0)
+                {
+
+                    AMRReductions<VariableType::diagnostic> amr_reductions(m_bh_amr);
+                    double L2_Ham = amr_reductions.norm(c_Ham);
+                    double L2_Mom = amr_reductions.norm(Interval(c_Mom, c_Mom));
+                    SmallDataIO constraints_file(m_p.data_path + "constraint_norms",
+                                                 m_dt, m_time, m_restart_time,
+                                                 SmallDataIO::APPEND, first_step);
+                    constraints_file.remove_duplicate_time_data();
+                    if (first_step)
+                    {
+                        constraints_file.write_header_line({"L^2_Ham", "L^2_Mom"});
+                    }
+                    constraints_file.write_time_data_line({L2_Ham, L2_Mom});
+        
+
+
+
+            }
+
+            
+        }
+
+        #ifdef USE_AHFINDER
+        // if print is on and there are Diagnostics to write, calculate them!
+        if (m_p.AH_activate && m_level == m_p.AH_params.level_to_run)
+            m_bh_amr.m_ah_finder.solve(m_dt, m_time, m_restart_time);
+        #endif
+    }
+    
+    
    
 
-    if (m_p.activate_extraction == 1)
+ /*  if (m_p.activate_extraction == 1)
     {
         int weyl_min_level = m_p.extraction_params.min_extraction_level();
         bool calculate_weyl = at_level_timestep_multiple(weyl_min_level);
@@ -206,6 +231,5 @@ void ScalarField2DLevel::specificPostTimeStep()
                 weyl_extraction.execute_query(m_bh_amr.m_interpolator);
             }
         }
+*/
 
-    }
-}

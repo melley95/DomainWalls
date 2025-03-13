@@ -121,7 +121,7 @@ template <class potential_t> class MatterEnergy
         flux1 *= det_gamma;
 */
         // calculate the E source
-        data_t source1 = -emtensor.rho * vars.lapse * vars.K +  emtensor.rho * vars.shift[1]/cartoon_coord + vars.lapse * vars_K_ww * emtensor.Sww * gamma_UU_ww * gamma_UU_ww;
+        data_t source1 = -emtensor.rho * vars.lapse * vars.K + vars.lapse * vars_K_ww * emtensor.Sww * gamma_UU_ww * gamma_UU_ww + emtensor.rho * vars.shift[1]/cartoon_coord;
         FOR1(i)
         {
             source1 += d1.shift[i][i] * emtensor.rho;
