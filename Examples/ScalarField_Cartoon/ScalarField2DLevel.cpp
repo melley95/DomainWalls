@@ -11,7 +11,7 @@
 #include "CCZ4Cartoon.hpp"
 #include "ComputePack.hpp"
 #include "ConstraintsCartoon.hpp"
-#include "MovingPunctureGaugeSA.hpp"
+#include "MovingPunctureGauge.hpp"
 #include "NanCheck.hpp"
 #include "PositiveChiAndAlpha.hpp"
 #include "SetValue.hpp"
@@ -32,7 +32,7 @@
 #include "ADMQuantitiesExtraction.hpp"
 #include "GammaCartoonCalculator.hpp"
 
-#include "MatterEnergy.hpp"
+#include "MatterEnergy_2.hpp"
 
 void ScalarField2DLevel::specificAdvance()
 {
@@ -88,7 +88,7 @@ void ScalarField2DLevel::specificEvalRHS(GRLevelData &a_soln,
     // Calculate CCZ4 right hand side
     Potential potential(m_p.potential_params);
     BoxLoops::loop(
-        CCZ4Cartoon<MovingPunctureGaugeSA, FourthOrderDerivatives, Potential>(
+        CCZ4Cartoon<MovingPunctureGauge, FourthOrderDerivatives, Potential>(
             m_p.ccz4_params, m_dx, m_p.sigma, potential, m_p.m_G_Newton,
             m_p.formulation),
         a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
@@ -135,9 +135,10 @@ void ScalarField2DLevel::specificPostTimeStep()
     {
         fillAllGhosts();
         Potential potential(m_p.potential_params);
+     //   MovingPunctureGauge gauge(m_p.ccz4_params);
         BoxLoops::loop(Constraints<Potential>(m_dx, potential, m_p.m_G_Newton),
         m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
-        BoxLoops::loop(MatterEnergy<Potential>(potential, m_dx, m_p.center),
+        BoxLoops::loop(MatterEnergy_2<Potential, MovingPunctureGauge>(m_p.ccz4_params, potential, m_dx, m_p.center),
                        m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
         if (m_level == min_level)
         {

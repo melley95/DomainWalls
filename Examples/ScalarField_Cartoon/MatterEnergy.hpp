@@ -13,7 +13,6 @@
 #include "Coordinates.hpp"
 #include "FourthOrderDerivatives.hpp"
 #include "GRInterval.hpp"
-#include "CCZ4Cartoon.hpp"
 #include "Tensor.hpp"
 #include "UserVariables.hpp" //This files needs NUM_VARS - total number of components
 #include "VarsTools.hpp"
@@ -52,7 +51,7 @@ template <class potential_t> class MatterEnergy
 
         auto h_UU = TensorAlgebra::compute_inverse_sym(vars.h);
         auto h_UU_ww = 1. / vars.hww;
-        auto gamma_UU_ww = vars.chi * h_UU_ww ; // CHECK
+        auto gamma_UU_ww = vars.chi * h_UU_ww ; 
         auto chris = TensorAlgebra::compute_christoffel(d1.h, h_UU);
         const int dI = CH_SPACEDIM - 1;
         const int nS = GR_SPACEDIM - CH_SPACEDIM; //!< Dimensions of the transverse sphere
@@ -69,7 +68,7 @@ template <class potential_t> class MatterEnergy
 
         emtensorCartoon_t<data_t> emtensor = compute_SF_EM_tensor(vars, d1, h_UU, h_UU_ww, chris, nS, V_of_phi); 
             
-        const data_t det_gamma = pow(vars.chi, -3.0) * 8.0 * sqrt(pow(coords.x, 2.0) + pow(coords.y, 2.0));
+        const data_t det_gamma = pow(vars.chi, -3.0) * 2.0 * M_PI * abs(coords.y);
         Tensor<2, data_t> vars_gamma, vars_K_tensor;
         const data_t vars_K_ww = 1.0 / vars.chi * (vars.Aww + 1.0 / 3.0 * vars.hww * vars.K);
         FOR2(i, j)
@@ -79,7 +78,7 @@ template <class potential_t> class MatterEnergy
                 1.0 / vars.chi *
                 (vars.A[i][j] + 1.0 / 3.0 * vars.h[i][j] * vars.K);  //THIS RIGHT??
         }
-        const auto gamma_UU = compute_inverse_sym(vars_gamma);
+        const auto gamma_UU = vars.hww*compute_inverse_sym(vars_gamma);
         const Tensor<3, data_t> chris_phys =
             compute_phys_chris(d1.chi, vars.chi, vars.h, h_UU, chris.ULL);
         // coordinate quantities
@@ -105,7 +104,7 @@ template <class potential_t> class MatterEnergy
         data_t sqrt_det_Sigma = area_element_sphere(spherical_gamma);
 */
         // calculate according to Landau Lifshitz method
-        data_t rho1 = emtensor.rho * det_gamma;
+        data_t rho1 = emtensor.rho * det_gamma; //* 8.0 * sqrt(pow(coords.x, 2.0) + pow(coords.y, 2.0));
 
   /*      // Energy flux
         data_t flux1 = 0.0;
@@ -144,7 +143,7 @@ template <class potential_t> class MatterEnergy
                 }
             }
         }
-        source1 *= det_gamma;
+        source1 *= det_gamma; //* 8.0 * sqrt(pow(coords.x, 2.0) + pow(coords.y, 2.0));
 
         // assign values of MatterEnergy in output box
         current_cell.store_vars(rho1, c_rhoLL);

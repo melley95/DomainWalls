@@ -49,6 +49,8 @@ class MovingPunctureGauge
   public:
     MovingPunctureGauge(const params_t &a_params) : m_params(a_params) {}
 
+
+   
     template <class data_t, template <typename> class vars_t,
               template <typename> class diff2_vars_t>
     inline void rhs_gauge(vars_t<data_t> &rhs, const vars_t<data_t> &vars,
@@ -58,7 +60,7 @@ class MovingPunctureGauge
     {
         rhs.lapse = m_params.lapse_advec_coeff * advec.lapse -
                     m_params.lapse_coeff *
-                        pow(vars.lapse, m_params.lapse_power) *  exp(- m_params.exp_lapse_coeff*vars.lapse )*
+                        pow(vars.lapse, m_params.lapse_power) *
                         (vars.K - 2 * vars.Theta);
         FOR(i)
         {

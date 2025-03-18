@@ -49,13 +49,15 @@ class SimulationParameters : public SimulationParametersBase
         // pp.load("sf_phi0", init_SF_params.phi0, .1);
         pp.load("R0", init_SF_params.a, 0.0);
         pp.load("e", init_SF_params.e, 0.0);
-        pp.load("lambda", init_SF_params.lambda, 0.0);
-        pp.load("sf_eta", init_SF_params.eta, 0.0);
+        pp.load("lambda", potential_params.lambda, 0.0);
+        pp.load("sf_eta", potential_params.eta, 0.0);
         pp.load("center_SF", init_SF_params.centerSF, center);
 
         // Potential params
-       potential_params.eta = init_SF_params.eta;
-       potential_params.lambda = init_SF_params.lambda;
+        init_SF_params.eta = potential_params.eta;
+        init_SF_params.lambda = potential_params.lambda ;
+
+
  
 
         pp.load("thresh_phi", threshold_phi, 0.0);

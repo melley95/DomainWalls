@@ -37,6 +37,8 @@ enum
 
     c_Sww,
 
+    c_det_gamma,
+
     // c_S,
 
     // c_Sxx_TF,
@@ -64,7 +66,12 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
      
      "Sxx",    "Sxy",    "Syy",
      
-     "Sww"};     
+     "Sww",
+
+     "det_gamma"
+    
+    
+    };     
 // "S",        "Sxx_TF", "Sxy_TF", "Syy_TF", "Sww_TF"
 } // namespace DiagnosticVariables
 

@@ -45,6 +45,7 @@ template <class potential_t> class Constraints
         data_t S;
         Tensor<2, data_t> Sij_TF;
         data_t Sww_TF;
+        data_t det_gamma;
     };
 
     Constraints(double dx, potential_t a_potential, double a_G_Newton,

@@ -58,6 +58,7 @@ void Constraints<potential_t>::compute(Cell<data_t> current_cell) const
     current_cell.store_vars(out.Sij[0][1], c_Sxy);
     current_cell.store_vars(out.Sij[1][1], c_Syy);
     current_cell.store_vars(out.Sww, c_Sww);
+    current_cell.store_vars(out.det_gamma, c_det_gamma);
     // current_cell.store_vars(out.S, c_S);
 
     // current_cell.store_vars(out.Sij_TF[0][0], c_Sxx_TF);
@@ -162,10 +163,21 @@ Constraints<potential_t>::constraint_equations(
     Mom_abs = sqrt(Mom_abs);
     out.Mom_abs = Mom_abs;
 
+    Tensor<2, data_t> vars_gamma;
+    FOR2(i, j)
+    {
+        vars_gamma[i][j] = vars.h[i][j] / vars.chi;
+    }
+    out.det_gamma = TensorAlgebra::compute_determinant(vars_gamma);
+    out.det_gamma *= vars.hww/vars.chi;
+    out.rho_ADM = out.rho * out.det_gamma;
+    
+    
+    
     out.rho = emtensor.rho;
-    data_t det_gamma = TensorAlgebra::compute_determinant(vars.h);
-    det_gamma *= vars.hww;
-    out.rho_ADM = out.rho * det_gamma;
+
+
+
     FOR(i)
     {
         out.Si[i] = emtensor.Si[i];
