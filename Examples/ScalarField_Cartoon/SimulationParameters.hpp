@@ -62,7 +62,7 @@ class SimulationParameters : public SimulationParametersBase
 
         pp.load("thresh_phi", threshold_phi, 0.0);
         pp.load("thresh_K", threshold_K, 0.0);
-        pp.load("r_limit", r_limit, 0.0);
+      
 
 
 
@@ -90,6 +90,10 @@ class SimulationParameters : public SimulationParametersBase
             bh2_params.center[idir] = centerB[idir] + offsetB[idir];
         }
 
+        pp.load("excise", excise, false);
+        pp.load("r_excise", r_excise);
+       
+
         
 
     #ifdef USE_AHFINDER
@@ -98,6 +102,9 @@ class SimulationParameters : public SimulationParametersBase
     
     #endif
     }
+
+   
+   
     void check_params()
     {
         
@@ -133,5 +140,8 @@ class SimulationParameters : public SimulationParametersBase
     #ifdef USE_AHFINDER
     double AH_initial_guess;
     #endif
+
+    bool excise;
+    double r_excise;
 };
 #endif /* SIMULATIONPARAMETERS_HPP_ */

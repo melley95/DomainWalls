@@ -78,7 +78,7 @@ template <class potential_t> class MatterEnergy
                 1.0 / vars.chi *
                 (vars.A[i][j] + 1.0 / 3.0 * vars.h[i][j] * vars.K);  //THIS RIGHT??
         }
-        const auto gamma_UU = vars.hww*compute_inverse_sym(vars_gamma);
+        const auto gamma_UU = compute_inverse_sym(vars_gamma);
         const Tensor<3, data_t> chris_phys =
             compute_phys_chris(d1.chi, vars.chi, vars.h, h_UU, chris.ULL);
         // coordinate quantities
@@ -104,7 +104,10 @@ template <class potential_t> class MatterEnergy
         data_t sqrt_det_Sigma = area_element_sphere(spherical_gamma);
 */
         // calculate according to Landau Lifshitz method
-        data_t rho1 = emtensor.rho * det_gamma; //* 8.0 * sqrt(pow(coords.x, 2.0) + pow(coords.y, 2.0));
+        data_t rho1 =  emtensor.rho;
+    
+        rho1 *= det_gamma;
+
 
   /*      // Energy flux
         data_t flux1 = 0.0;

@@ -33,6 +33,7 @@
 #include "GammaCartoonCalculator.hpp"
 
 #include "MatterEnergy_2.hpp"
+#include "ExcisionDiagnostics.hpp"
 
 void ScalarField2DLevel::specificAdvance()
 {
@@ -128,6 +129,16 @@ void ScalarField2DLevel::specificPostTimeStep()
     int min_level = 0;
     bool fill_ghosts = false;
     bool calculate_min_level = at_level_timestep_multiple(min_level);
+
+    if (m_p.excise)
+    {
+
+    BoxLoops::loop(
+        ExcisionDiagnostics(m_dx, m_p.center, 0.0, 
+                            m_p.r_excise), //m_p.extraction_params.extraction_radii.size() -1 - i
+        m_state_diagnostics, m_state_diagnostics, SKIP_GHOST_CELLS,
+        disable_simd());
+    }
 
 
 

@@ -117,7 +117,12 @@
          data_t sqrt_det_Sigma = area_element_sphere(spherical_gamma);
  */
          // calculate according to Landau Lifshitz method
-         data_t rho1 = emtensor.rho * det_gamma;
+         data_t rho1 = - vars.lapse * emtensor.rho;
+         FOR1(i)
+         {
+            rho1 += vars.shift[i]*emtensor.Si[i];
+         }
+         rho1 *= det_gamma;
  
    /*      // Energy flux
          data_t flux1 = 0.0;
@@ -134,7 +139,7 @@
  */
          // calculate the E source
          data_t source1 = -emtensor.rho * rhs.lapse - vars.lapse * vars.lapse * vars_K_ww * emtensor.Sww * gamma_UU_ww * gamma_UU_ww
-                          +   vars.lapse * emtensor.Sww * gamma_UU_ww * vars.shift[1]/cartoon_coord ;
+                          +  vars.lapse * emtensor.Sww * gamma_UU_ww * vars.shift[1]/cartoon_coord ;
                        
          FOR1(i)
          {
