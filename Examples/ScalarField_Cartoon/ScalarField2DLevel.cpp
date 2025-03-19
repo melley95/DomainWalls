@@ -113,7 +113,7 @@ void ScalarField2DLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
 {
 
     BoxLoops::loop(
-        PhiAndKExtractionTaggingCriterion(m_dx, m_p.threshold_phi, m_p.threshold_K, m_p.r_limit, m_level, m_p.extraction_params, m_p.activate_extraction),
+        PhiAndKExtractionTaggingCriterion(m_dx, m_p.threshold_phi, m_p.threshold_K, m_level, m_p.extraction_params, m_p.activate_extraction),
         current_state, tagging_criterion);
 
 
@@ -130,16 +130,6 @@ void ScalarField2DLevel::specificPostTimeStep()
     bool fill_ghosts = false;
     bool calculate_min_level = at_level_timestep_multiple(min_level);
 
-    if (m_p.excise)
-    {
-
-    BoxLoops::loop(
-        ExcisionDiagnostics(m_dx, m_p.center, 0.0, 
-                            m_p.r_excise), //m_p.extraction_params.extraction_radii.size() -1 - i
-        m_state_diagnostics, m_state_diagnostics, SKIP_GHOST_CELLS,
-        disable_simd());
-    }
-
 
 
     if (calculate_min_level)
@@ -151,6 +141,15 @@ void ScalarField2DLevel::specificPostTimeStep()
         m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
         BoxLoops::loop(MatterEnergy_2<Potential, MovingPunctureGauge>(m_p.ccz4_params, potential, m_dx, m_p.center),
                        m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+
+      if (m_p.excise)
+      {
+                   
+    BoxLoops::loop(ExcisionDiagnostics(m_dx, m_p.center, 
+                                               m_p.r_excise), 
+                           m_state_diagnostics, m_state_diagnostics, SKIP_GHOST_CELLS,
+                           disable_simd());
+      }
         if (m_level == min_level)
         {
       

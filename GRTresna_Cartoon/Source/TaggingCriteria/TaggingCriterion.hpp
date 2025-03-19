@@ -15,7 +15,7 @@ class TaggingCriterion
                                       LevelData<FArrayBox> &a_multigrid_vars,
                                       const RealVect &a_dx,
                                       const std::array<double, SpaceDim> center,
-                                      Real regrid_radius) = 0;
+                                      Real regrid_x, Real regrid_y) = 0;
 
     virtual ~TaggingCriterion() = default;
 

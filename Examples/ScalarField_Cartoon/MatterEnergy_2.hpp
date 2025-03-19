@@ -81,7 +81,7 @@
  
          emtensorCartoon_t<data_t> emtensor = compute_SF_EM_tensor(vars, d1, h_UU, h_UU_ww, chris, nS, V_of_phi); 
              
-         const data_t det_gamma = pow(vars.chi, -1.5) * 2.0 * M_PI * abs(coords.y);
+         const data_t det_gamma = pow(vars.chi, -1.5) * 4.0 * M_PI * abs(coords.y);
          Tensor<2, data_t> vars_gamma, vars_K_tensor;
          const data_t vars_K_ww = 1.0 / vars.chi * (vars.Aww + 1.0 / 3.0 * vars.hww * vars.K);
          FOR2(i, j)

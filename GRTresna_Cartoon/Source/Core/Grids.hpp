@@ -31,7 +31,8 @@ class Grids
         int bufferSize;
         Real fillRatio;
         Real refineThresh;
-        Real regrid_radius;
+        Real regrid_x;
+        Real regrid_y;
         int coefficient_average_type;
 
         Vector<int> periodic;

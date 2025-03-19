@@ -122,7 +122,6 @@ class SimulationParameters : public SimulationParametersBase
     double threshold_phi;
     double threshold_K; 
 
-    double r_limit;
 
 
 

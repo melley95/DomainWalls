@@ -51,7 +51,8 @@ void Grids::read_params(GRParmParse &pp, params_t &m_grid_params)
     pp.load("max_grid_size", m_grid_params.maxGridSize, 16);
     pp.load("fill_ratio", m_grid_params.fillRatio, 0.75);
     pp.load("buffer_size", m_grid_params.bufferSize, 0);
-    pp.load("regrid_radius", m_grid_params.regrid_radius, 0.0);
+    pp.load("regrid_x", m_grid_params.regrid_x, 0.0);
+    pp.load("regrid_y", m_grid_params.regrid_y, 0.0);
 
     // Default number of ghosts
     m_grid_params.num_ghosts = 3;
@@ -360,7 +361,7 @@ void Grids::set_grids()
 
             tagging_criterion->set_regrid_condition(
                 *vect_tagging_criterion[level], *temp_multigrid_vars, dxLevel,
-                m_grid_params.center, m_grid_params.regrid_radius);
+                m_grid_params.center, m_grid_params.regrid_x, m_grid_params.regrid_y);
 
             if (temp_multigrid_vars != NULL)
             {

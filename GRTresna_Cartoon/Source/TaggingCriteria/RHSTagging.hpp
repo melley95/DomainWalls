@@ -26,7 +26,7 @@ class RHSTagging : public TaggingCriterion
                               LevelData<FArrayBox> &a_multigrid_vars,
                               const RealVect &a_dx,
                               const std::array<double, SpaceDim> center,
-                              Real regrid_radius);
+                              Real regrid_x, Real regrid_y);
 
   private:
     method_t const *method;
@@ -39,7 +39,7 @@ template <typename method_t, typename matter_t>
 void RHSTagging<method_t, matter_t>::set_regrid_condition(
     LevelData<FArrayBox> &a_condition, LevelData<FArrayBox> &a_multigrid_vars,
     const RealVect &a_dx, const std::array<double, SpaceDim> center,
-    Real regrid_radius)
+    Real regrid_x, Real regrid_y)
 {
     DerivativeOperators derivs(a_dx);
     CH_assert(a_multigrid_vars.nComp() == NUM_MULTIGRID_VARS);
@@ -101,10 +101,10 @@ void RHSTagging<method_t, matter_t>::set_regrid_condition(
             const auto emtensor =
                 matter->compute_emtensor(iv, a_dx, multigrid_vars_box);
 
-            if (regrid_radius > 0)
+            if (regrid_x > 0 && regrid_y > 0)
             {
-                Real rr = sqrt(loc[0] * loc[0] +loc[1] * loc[1]);
-                if (rr < regrid_radius)
+             //   Real rr = sqrt(loc[0] * loc[0] +loc[1] * loc[1]);
+                if (loc[0] < regrid_x && loc[1] < regrid_y)
                 {
                     condition_box(iv, 0) = 1.0;
                 }
