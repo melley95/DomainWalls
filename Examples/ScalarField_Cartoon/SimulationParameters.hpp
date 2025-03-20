@@ -61,7 +61,7 @@ class SimulationParameters : public SimulationParametersBase
  
 
         pp.load("thresh_phi", threshold_phi, 0.0);
-        pp.load("thresh_K", threshold_K, 0.0);
+        pp.load("thresh_chi", threshold_chi, 0.0);
       
 
 
@@ -120,7 +120,7 @@ class SimulationParameters : public SimulationParametersBase
 
     // For PhiAndK regridding
     double threshold_phi;
-    double threshold_K; 
+    double threshold_chi; 
 
 
 

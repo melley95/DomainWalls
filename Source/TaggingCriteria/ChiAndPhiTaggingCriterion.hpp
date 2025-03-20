@@ -7,10 +7,10 @@
 #define CHIANDPHITAGGINGCRITERION_HPP_
 
 #include "Cell.hpp"
-#include "Coordinates.hpp"
+ // #include "Coordinates.hpp"
 #include "DimensionDefinitions.hpp"
 #include "FourthOrderDerivatives.hpp"
-#include "ScalarField.hpp"
+// #include "ScalarField.hpp"
 #include "Tensor.hpp"
 
 class ChiAndPhiTaggingCriterion
@@ -21,11 +21,11 @@ class ChiAndPhiTaggingCriterion
     const double m_threshold_chi;
     const double m_threshold_phi;
 
-    template <class data_t>
-    using MatterVars = typename ScalarField<>::template Vars<data_t>;
+   // template <class data_t>
+   // using MatterVars = typename ScalarField<>::template Vars<data_t>;
 
     /// Vars object for chi
-    template <class data_t> struct Vars
+  /*  template <class data_t> struct Vars
     {
         data_t chi; //!< Conformal factor
 
@@ -37,7 +37,7 @@ class ChiAndPhiTaggingCriterion
             define_enum_mapping(mapping_function, c_chi, chi);
         }
     };
-
+*/
   public:
     ChiAndPhiTaggingCriterion(const double dx, const double threshold_chi,
                               const double threshold_phi)
@@ -46,25 +46,23 @@ class ChiAndPhiTaggingCriterion
 
     template <class data_t> void compute(Cell<data_t> current_cell) const
     {
-        const auto d2 = m_deriv.template diff2<MatterVars>(current_cell);
-        const auto d2chi = m_deriv.template diff2<Vars>(current_cell);
+      Tensor<1, data_t> d1_phi;
+      FOR(idir) m_deriv.diff1(d1_phi, current_cell, idir, c_phi);
 
-        data_t mod_d2_chi = 0;
-        data_t mod_d2_phi = 0;
+      Tensor<1, data_t> d1_chi;
+      FOR(idir) m_deriv.diff1(d1_chi, current_cell, idir, c_chi);
 
-        FOR(idir, jdir)
+        data_t mod_d1_chi = 0;
+        data_t mod_d1_phi = 0;
+
+        FOR(idir)
         {
-            mod_d2_chi += d2chi.chi[idir][jdir] * d2chi.chi[idir][jdir];
-
-            mod_d2_phi += d2.Pi[idir][jdir] * d2.Pi[idir][jdir] +
-                          d2.phi[idir][jdir] * d2.phi[idir][jdir];
+            mod_d1_phi += d1_phi[idir] * d1_phi[idir];
+            mod_d1_chi += d1_chi[idir] * d1_chi[idir];
         }
 
-        data_t criterion_chi = m_dx / m_threshold_chi * sqrt(mod_d2_chi);
-
-        data_t criterion_phi = m_dx / m_threshold_phi * sqrt(mod_d2_phi);
-
-        data_t criterion = simd_max(criterion_chi, criterion_phi);
+        data_t criterion = m_dx * (sqrt(mod_d1_phi) / m_threshold_phi +
+                                   sqrt(mod_d1_chi) / m_threshold_chi);
 
         // Write back into the flattened Chombo box
         current_cell.store_vars(criterion, 0);

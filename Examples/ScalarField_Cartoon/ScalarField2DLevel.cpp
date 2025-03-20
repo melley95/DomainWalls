@@ -11,7 +11,7 @@
 #include "CCZ4Cartoon.hpp"
 #include "ComputePack.hpp"
 #include "ConstraintsCartoon.hpp"
-#include "MovingPunctureGauge.hpp"
+#include "MovingPunctureGaugeSA.hpp"
 #include "NanCheck.hpp"
 #include "PositiveChiAndAlpha.hpp"
 #include "SetValue.hpp"
@@ -19,7 +19,8 @@
 #include "WeylExtraction.hpp"
 #include "WeylOmScalar.hpp"
 
-#include "PhiAndKExtractionTaggingCriterion.hpp"
+ // #include "PhiAndKExtractionTaggingCriterion.hpp"
+#include "ChiAndPhiTaggingCriterion.hpp"
 
 // Initial data
 //#include "HeadOn2D.hpp"
@@ -89,7 +90,7 @@ void ScalarField2DLevel::specificEvalRHS(GRLevelData &a_soln,
     // Calculate CCZ4 right hand side
     Potential potential(m_p.potential_params);
     BoxLoops::loop(
-        CCZ4Cartoon<MovingPunctureGauge, FourthOrderDerivatives, Potential>(
+        CCZ4Cartoon<MovingPunctureGaugeSA, FourthOrderDerivatives, Potential>(
             m_p.ccz4_params, m_dx, m_p.sigma, potential, m_p.m_G_Newton,
             m_p.formulation),
         a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
@@ -112,9 +113,13 @@ void ScalarField2DLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
                                                  )
 {
 
-    BoxLoops::loop(
-        PhiAndKExtractionTaggingCriterion(m_dx, m_p.threshold_phi, m_p.threshold_K, m_level, m_p.extraction_params, m_p.activate_extraction),
+
+       BoxLoops::loop(
+        ChiAndPhiTaggingCriterion(m_dx, m_p.threshold_chi, m_p.threshold_phi),
         current_state, tagging_criterion);
+ //   BoxLoops::loop(
+   //     PhiAndKExtractionTaggingCriterion(m_dx, m_p.threshold_phi, m_p.threshold_K, m_level, m_p.extraction_params, m_p.activate_extraction),
+    //    current_state, tagging_criterion);
 
 
 }
@@ -139,17 +144,10 @@ void ScalarField2DLevel::specificPostTimeStep()
      //   MovingPunctureGauge gauge(m_p.ccz4_params);
         BoxLoops::loop(Constraints<Potential>(m_dx, potential, m_p.m_G_Newton),
         m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
-        BoxLoops::loop(MatterEnergy_2<Potential, MovingPunctureGauge>(m_p.ccz4_params, potential, m_dx, m_p.center),
+        BoxLoops::loop(MatterEnergy_2<Potential, MovingPunctureGaugeSA>(m_p.ccz4_params, potential, m_dx, m_p.center),
                        m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 
-      if (m_p.excise)
-      {
-                   
-    BoxLoops::loop(ExcisionDiagnostics(m_dx, m_p.center, 
-                                               m_p.r_excise), 
-                           m_state_diagnostics, m_state_diagnostics, SKIP_GHOST_CELLS,
-                           disable_simd());
-      }
+  
         if (m_level == min_level)
         {
       
@@ -177,10 +175,16 @@ void ScalarField2DLevel::specificPostTimeStep()
 
             if (m_p.calculate_constraint_norms){
 
-                fillAllGhosts();
-                Potential potential(m_p.potential_params);
-                BoxLoops::loop(Constraints<Potential>(m_dx, potential, m_p.m_G_Newton),
-                m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+                if (m_p.excise)
+                {
+                             
+              BoxLoops::loop(ExcisionDiagnostics(m_dx, m_p.center, 
+                                                         m_p.r_excise), 
+                                     m_state_diagnostics, m_state_diagnostics, SKIP_GHOST_CELLS,
+                                     disable_simd());
+                }
+
+               
 
                 if (m_level == 0)
                 {

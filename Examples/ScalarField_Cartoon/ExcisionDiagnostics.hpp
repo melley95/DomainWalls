@@ -38,8 +38,8 @@ class ExcisionDiagnostics
         const Coordinates<double> coords(current_cell, m_dx, m_center);
         if (coords.get_radius() < m_inner_r)
         {
-          current_cell.store_vars(0.0, c_rhoLL);
-          current_cell.store_vars(0.0, c_source);
+   //       current_cell.store_vars(0.0, c_rhoLL);
+    //      current_cell.store_vars(0.0, c_source);
           current_cell.store_vars(0.0, c_Ham);
           current_cell.store_vars(0.0, c_Mom1);
           current_cell.store_vars(0.0, c_Mom2);
