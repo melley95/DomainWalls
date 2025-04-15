@@ -17,7 +17,6 @@ class ChiAndPhiTaggingCriterion
 {
   protected:
     const double m_dx;
-    const double m_dt;
     const FourthOrderDerivatives m_deriv;
     const double m_threshold_chi;
     const double m_threshold_phi;
@@ -40,9 +39,9 @@ class ChiAndPhiTaggingCriterion
     };
 */
   public:
-    ChiAndPhiTaggingCriterion(const double dx, const double dt , const double threshold_chi,
+    ChiAndPhiTaggingCriterion(const double dx, const double threshold_chi,
                               const double threshold_phi)
-        : m_dx(dx), m_dt(dt), m_deriv(dx), m_threshold_chi(threshold_chi),
+        : m_dx(dx), m_deriv(dx), m_threshold_chi(threshold_chi),
           m_threshold_phi(threshold_phi){};
 
     template <class data_t> void compute(Cell<data_t> current_cell) const
@@ -53,22 +52,17 @@ class ChiAndPhiTaggingCriterion
       Tensor<1, data_t> d1_chi;
       FOR(idir) m_deriv.diff1(d1_chi, current_cell, idir, c_chi);
 
-        data_t pi = current_cell.load_vars(c_Pi);
-
         data_t mod_d1_chi = 0;
         data_t mod_d1_phi = 0;
-   
-
 
         FOR(idir)
         {
             mod_d1_phi += d1_phi[idir] * d1_phi[idir];
-            
             mod_d1_chi += d1_chi[idir] * d1_chi[idir];
         }
 
-        data_t criterion = m_dx * (sqrt(mod_d1_phi) / m_threshold_phi) + m_dt * (sqrt(pi*pi) / m_threshold_phi)
-                                + m_dx  * (sqrt(mod_d1_chi) / m_threshold_chi);
+        data_t criterion = m_dx * (sqrt(mod_d1_phi) / m_threshold_phi +
+                                   sqrt(mod_d1_chi) / m_threshold_chi);
 
         // Write back into the flattened Chombo box
         current_cell.store_vars(criterion, 0);

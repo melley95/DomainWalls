@@ -20,9 +20,9 @@
 #include "WeylOmScalar.hpp"
 
 // #include "PhiAndKExtractionTaggingCriterion.hpp"
-// #include "ChiAndPhiTaggingCriterion.hpp"
+#include "ChiAndPhiTaggingCriterion.hpp"
 // #include "ChiAndPhiTaggingCriterionDiagnostic.hpp"
- #include "PhiTaggingCriterion.hpp"
+ // #include "PhiTaggingCriterion.hpp"
 
 // Initial data
 //#include "HeadOn2D.hpp"
@@ -111,7 +111,7 @@ void ScalarField2DLevel::specificUpdateODE(GRLevelData &a_soln,
 void ScalarField2DLevel::preTagCells()
 {
     fillAllGhosts(VariableType::evolution, Interval(c_chi, c_chi));
-    fillAllGhosts(VariableType::evolution, Interval(c_K, c_K));
+ //  fillAllGhosts(VariableType::evolution, Interval(c_K, c_K));
     fillAllGhosts(VariableType::evolution, Interval(c_phi, c_phi));    
 
 }
@@ -121,12 +121,12 @@ void ScalarField2DLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
                                                  )
 {
 
-      BoxLoops::loop(
-        PhiTaggingCriterion(m_dx, m_time, m_level, m_p.ref_times, m_p.ref_levels, m_p.threshold_chi, m_p.threshold_K),
+    //  BoxLoops::loop(
+     //   PhiTaggingCriterion(m_dx, m_time, m_level, m_p.ref_times, m_p.ref_levels, m_p.threshold_chi, m_p.threshold_K),
+      //  current_state, tagging_criterion);
+        BoxLoops::loop(
+        ChiAndPhiTaggingCriterion(m_dx, m_dt, m_p.threshold_chi, m_p.threshold_phi),
         current_state, tagging_criterion);
-   //     BoxLoops::loop(
-    //    ChiAndPhiTaggingCriterion(m_dx, m_p.threshold_chi, m_p.threshold_phi),
-     //   current_state, tagging_criterion);
   //  BoxLoops::loop(
     //    PhiAndKExtractionTaggingCriterion(m_dx, m_p.threshold_phi, m_p.threshold_K, m_level, m_p.extraction_params, m_p.activate_extraction),
      //   current_state, tagging_criterion);

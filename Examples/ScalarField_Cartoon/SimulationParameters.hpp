@@ -15,7 +15,7 @@
 #include "BoostedBH.hpp"
 #include "InitialScalarData_2D.hpp"
 #include "Potential.hpp"
-// #include "PhiAndKExtractionTaggingCriterion.hpp"
+
 
 
 #ifdef USE_AHFINDER
@@ -61,9 +61,9 @@ class SimulationParameters : public SimulationParametersBase
  
 
    //     pp.load("thresh_rho", threshold_rho, 0.0);
-       pp.load("thresh_K", threshold_K, 0.0);
+    //   pp.load("thresh_K", threshold_K, 0.0);
        pp.load("thresh_chi", threshold_chi, 0.0);
-     //   pp.load("thresh_phi", threshold_phi, 0.0);
+        pp.load("thresh_phi", threshold_phi, 0.0);
       
 
 
@@ -131,9 +131,9 @@ class SimulationParameters : public SimulationParametersBase
 
     // For PhiAndK regridding
    // double threshold_rho;
-   double threshold_K;
+  // double threshold_K;
    double threshold_chi; 
-   // double threshold_phi;
+    double threshold_phi;
 
 
 
