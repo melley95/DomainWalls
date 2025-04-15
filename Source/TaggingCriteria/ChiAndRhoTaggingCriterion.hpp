@@ -3,8 +3,8 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#ifndef CHIANDPHITAGGINGCRITERION_HPP_
-#define CHIANDPHITAGGINGCRITERION_HPP_
+#ifndef CHIANDRHOTAGGINGCRITERION_HPP_
+#define CHIANDRHOTAGGINGCRITERION_HPP_
 
 #include "Cell.hpp"
  // #include "Coordinates.hpp"
@@ -13,13 +13,13 @@
 // #include "ScalarField.hpp"
 #include "Tensor.hpp"
 
-class ChiAndPhiTaggingCriterion
+class ChiAndRhoTaggingCriterion
 {
   protected:
     const double m_dx;
     const FourthOrderDerivatives m_deriv;
     const double m_threshold_chi;
-    const double m_threshold_phi;
+    const double m_threshold_rho;
 
    // template <class data_t>
    // using MatterVars = typename ScalarField<>::template Vars<data_t>;
@@ -39,31 +39,29 @@ class ChiAndPhiTaggingCriterion
     };
 */
   public:
-    ChiAndPhiTaggingCriterion(const double dx, const double threshold_chi,
-                              const double threshold_phi)
+    ChiAndRhoTaggingCriterion(const double dx, const double threshold_chi,
+                              const double threshold_rho)
         : m_dx(dx), m_deriv(dx), m_threshold_chi(threshold_chi),
-          m_threshold_phi(threshold_phi){};
+          m_threshold_rho(threshold_rho){};
 
     template <class data_t> void compute(Cell<data_t> current_cell) const
     {
-      Tensor<1, data_t> d1_phi;
-      FOR(idir) m_deriv.diff1(d1_phi, current_cell, idir, c_phi);
+      data_t rho = current_cell.load_vars(c_rho);
 
       Tensor<1, data_t> d1_chi;
       FOR(idir) m_deriv.diff1(d1_chi, current_cell, idir, c_chi);
 
         data_t mod_d1_chi = 0;
-        data_t mod_d1_phi = 0;
-
+     
         FOR(idir)
         {
-            mod_d1_phi += d1_phi[idir] * d1_phi[idir];
+          
             mod_d1_chi += d1_chi[idir] * d1_chi[idir];
         }
 
-        data_t criterion = m_dx * (sqrt(mod_d1_phi) / m_threshold_phi +
-                                   sqrt(mod_d1_chi) / m_threshold_chi);
+        data_t criterion = m_dx * m_dx * rho / m_threshold_rho +  m_dx *  sqrt(mod_d1_chi) / m_threshold_chi;
 
+                               \
         // Write back into the flattened Chombo box
         current_cell.store_vars(criterion, 0);
 
@@ -71,4 +69,4 @@ class ChiAndPhiTaggingCriterion
     }
 };
 
-#endif /* CHIANDPHITAGGINGCRITERION_HPP_ */
+#endif /* CHIANDRHOTAGGINGCRITERION_HPP_ */

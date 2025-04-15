@@ -96,6 +96,8 @@ void CCZ4Cartoon<gauge_t, deriv_t, potential_t>::compute(Cell<data_t> current_ce
     CCZ4Cartoon<gauge_t, deriv_t>::rhs_equation(rhs, vars, d1, d2, advec,
                                                 coords.y);
 
+    
+
     this->m_deriv.add_dissipation(rhs, current_cell, this->m_sigma);
 
     current_cell.store_vars(rhs); // Write the rhs into the output FArrayBox

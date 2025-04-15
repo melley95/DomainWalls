@@ -15,7 +15,7 @@
 #include "BoostedBH.hpp"
 #include "InitialScalarData_2D.hpp"
 #include "Potential.hpp"
-#include "PhiAndKExtractionTaggingCriterion.hpp"
+// #include "PhiAndKExtractionTaggingCriterion.hpp"
 
 
 #ifdef USE_AHFINDER
@@ -60,8 +60,10 @@ class SimulationParameters : public SimulationParametersBase
 
  
 
-        pp.load("thresh_phi", threshold_phi, 0.0);
-        pp.load("thresh_chi", threshold_chi, 0.0);
+   //     pp.load("thresh_rho", threshold_rho, 0.0);
+       pp.load("thresh_K", threshold_K, 0.0);
+       pp.load("thresh_chi", threshold_chi, 0.0);
+     //   pp.load("thresh_phi", threshold_phi, 0.0);
       
 
 
@@ -92,6 +94,15 @@ class SimulationParameters : public SimulationParametersBase
 
         pp.load("excise", excise, false);
         pp.load("r_excise", r_excise);
+
+      
+
+
+
+       
+       pp.load("ref_times", ref_times);
+       pp.load("ref_levels", ref_levels);
+   //    pp.load("threshold_rho", threshold_rho);
        
 
         
@@ -119,9 +130,10 @@ class SimulationParameters : public SimulationParametersBase
 
 
     // For PhiAndK regridding
-    double threshold_phi;
-    double threshold_chi; 
-
+   // double threshold_rho;
+   double threshold_K;
+   double threshold_chi; 
+   // double threshold_phi;
 
 
 
@@ -142,5 +154,13 @@ class SimulationParameters : public SimulationParametersBase
 
     bool excise;
     double r_excise;
+
+
+    std::array<double, 10> ref_times;
+    std::array<int, 10> ref_levels;
+
+   
+  //  std::array<double, 10> ref_rho;
+
 };
 #endif /* SIMULATIONPARAMETERS_HPP_ */

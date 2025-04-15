@@ -45,10 +45,13 @@ int runGRChombo(int argc, char *argv[])
 
 #ifdef USE_AHFINDER
     if (sim_params.AH_activate)
+
     {
-        AHSurfaceGeometry sph(sim_params.center);
-        bh_amr.m_ah_finder.add_ah(sph, sim_params.AH_initial_guess,
-                                  sim_params.AH_params);
+        std::array<double,CH_SPACEDIM> cent0 = {0.0, 0.0};
+        AHSurfaceGeometry ellips0(cent0);
+        AHInitialGuessEllipsoid ellipsoid0(5.0, 5.0);
+        bh_amr.m_ah_finder.add_ah(ellips0, ellipsoid0, sim_params.AH_params);
+   
     }
 #endif
 

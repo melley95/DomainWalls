@@ -39,6 +39,8 @@ enum
 
     c_det_gamma,
 
+    c_criterion,
+
     // c_S,
 
     // c_Sxx_TF,
@@ -68,7 +70,9 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
      
      "Sww",
 
-     "det_gamma"
+     "det_gamma",
+
+     "criterion"
     
     
     };     

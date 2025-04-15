@@ -45,7 +45,7 @@ class PhiAndKExtractionTaggingCriterion
         data_t mod_d1_K = 0;
         FOR(idir)
         {
-            mod_d1_phi += d1_phi[idir] * d1_phi[idir];
+            mod_d1_phi += sqrt(d1_phi[idir] * d1_phi[idir]);
             mod_d1_K += d1_K[idir] * d1_K[idir];
         }
 

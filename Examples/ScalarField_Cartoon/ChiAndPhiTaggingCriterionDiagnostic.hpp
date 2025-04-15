@@ -3,8 +3,8 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#ifndef CHIANDPHITAGGINGCRITERION_HPP_
-#define CHIANDPHITAGGINGCRITERION_HPP_
+#ifndef CHIANDPHITAGGINGCRITERIONDIAGNOSTIC_HPP_
+#define CHIANDPHITAGGINGCRITERIONDIAGNOSTIC_HPP_
 
 #include "Cell.hpp"
  // #include "Coordinates.hpp"
@@ -13,7 +13,7 @@
 // #include "ScalarField.hpp"
 #include "Tensor.hpp"
 
-class ChiAndPhiTaggingCriterion
+class ChiAndPhiTaggingCriterionDiagnostic
 {
   protected:
     const double m_dx;
@@ -39,7 +39,7 @@ class ChiAndPhiTaggingCriterion
     };
 */
   public:
-    ChiAndPhiTaggingCriterion(const double dx, const double threshold_chi,
+    ChiAndPhiTaggingCriterionDiagnostic(const double dx, const double threshold_chi,
                               const double threshold_phi)
         : m_dx(dx), m_deriv(dx), m_threshold_chi(threshold_chi),
           m_threshold_phi(threshold_phi){};
@@ -65,10 +65,10 @@ class ChiAndPhiTaggingCriterion
                                    sqrt(mod_d1_chi) / m_threshold_chi);
 
         // Write back into the flattened Chombo box
-        current_cell.store_vars(criterion, 0);
+      
 
-        
+        current_cell.store_vars(criterion, c_criterion);
     }
 };
 
-#endif /* CHIANDPHITAGGINGCRITERION_HPP_ */
+#endif /* CHIANDPHITAGGINGCRITERIONDIAGNOSTIC_HPP_ */
