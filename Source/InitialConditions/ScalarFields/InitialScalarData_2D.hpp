@@ -17,6 +17,9 @@
 #include <array>
 #include <vector>
 
+#include <iostream>
+#include <cmath>
+#include <limits>
 
 //! Class which solves for the initial data for a spherically symmetric boson
 //! star with phi^4 coupling
@@ -28,7 +31,7 @@ class InitialScalarData_2D
     {
         double eta;
         double lambda;
-        double a;
+        double b;
         double e;
         std::array<double, CH_SPACEDIM>
             centerSF;

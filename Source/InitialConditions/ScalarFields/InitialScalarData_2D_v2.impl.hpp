@@ -28,50 +28,29 @@ void InitialScalarData_2D::compute(Cell<data_t> current_cell) const
 
     // Get coords and radius
     Coordinates<data_t> coords(current_cell, m_dx, m_init_SF_params.centerSF);
-    data_t x_p = coords.x;
-    data_t y_p = coords.y;
+    data_t x = coords.x;
+    data_t y = coords.y;
     
 
   
-   // data_t r2 = simd_max(x*x + y*y, 1e-12);
+    data_t r2 = simd_max(x*x + y*y, 1e-12);
 
-   // data_t cos2phi = y*y/r2;
-  //  data_t sin2phi = x*x/r2;
+    data_t cos2phi = y*y/r2;
+    data_t sin2phi = x*x/r2;
  
 
     data_t R;
 
     //R = m_init_SF_params.R0/sqrt(cos2phi+pow(m_init_SF_params.eps1, -2)*sin2phi);
 
-    data_t b = m_init_SF_params.b;
-    data_t a = b/sqrt(1.0 - pow(m_init_SF_params.e, 2.0));
+    data_t a = m_init_SF_params.a;
+    data_t b = a/sqrt(1.0 - pow(m_init_SF_params.e, 2.0));
 
-    
+     R = (a*b)/sqrt((a*a*x*x + b*b*y*y)/(x*x + y*y));
 
-    data_t min_theta = 0.0;
-    data_t min_dist = std::numeric_limits<double>::max();
-    data_t best_theta = 0.0;
+    // data_t phi = tanh((sqrt(x*x+y*y)-R)/sqrt(2.0));
 
-    int steps = 10000;
-    for (int i = 0; i <= steps; ++i) {
-        double theta = 2.0 * M_PI * i / steps;
-        data_t x = a * std::cos(theta);
-        data_t y = b * std::sin(theta);
-        data_t dist= (x - x_p) * (x - x_p) + (y - y_p) * (y - y_p);
-       
-        if (dist < min_dist) {
-            min_dist = dist;
-            best_theta = theta;
-        }
-    }
-    data_t sign = 1;
-    if (x_p*x_p/(a*a) + y_p*y_p/(b*b) < 1 ){
-        sign = -1;
-    }
-
-    
-
-    data_t phi = m_init_SF_params.eta*tanh(sqrt(0.5*m_init_SF_params.lambda)*m_init_SF_params.eta*(sign*sqrt(min_dist)));
+    data_t phi = m_init_SF_params.eta*tanh(sqrt(0.5*m_init_SF_params.lambda)*m_init_SF_params.eta*(sqrt(r2)-R));
 
     data_t Pi = 0;
 

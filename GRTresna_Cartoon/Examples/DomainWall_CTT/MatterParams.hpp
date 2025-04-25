@@ -10,7 +10,7 @@ struct params_t
 {
     Real lambda;
     Real eta;
-    Real a;
+    Real b;
     Real e;
 
  
@@ -20,7 +20,7 @@ inline void read_params(GRParmParse &pp, params_t &matter_params)
 {
     pp.get("eta", matter_params.eta);
     pp.get("lambda", matter_params.lambda);
-    pp.get("R0", matter_params.a);
+    pp.get("R0", matter_params.b);
     pp.get("e", matter_params.e);
 
 }
