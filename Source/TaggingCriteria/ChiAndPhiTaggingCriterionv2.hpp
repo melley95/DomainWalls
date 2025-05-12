@@ -17,10 +17,15 @@ class ChiAndPhiTaggingCriterion
 {
   protected:
     const double m_dx;
+    const double m_dt;
     const FourthOrderDerivatives m_deriv;
     const double m_threshold_chi;
     const double m_threshold_phi;
 
+    const double m_time;
+    const double m_rebound_time;
+    const double m_threshold_chi_rebound;
+    const double m_threshold_phi_rebound;
    // template <class data_t>
    // using MatterVars = typename ScalarField<>::template Vars<data_t>;
 
@@ -39,10 +44,10 @@ class ChiAndPhiTaggingCriterion
     };
 */
   public:
-    ChiAndPhiTaggingCriterion(const double dx, const double threshold_chi,
-                              const double threshold_phi)
-        : m_dx(dx), m_deriv(dx), m_threshold_chi(threshold_chi),
-          m_threshold_phi(threshold_phi){};
+    ChiAndPhiTaggingCriterion(const double dx, const double dt , const double threshold_chi,
+                              const double threshold_phi, const double time, const double rebound_time, const double threshold_chi_rebound, const double threshold_phi_rebound)
+        : m_dx(dx), m_dt(dt), m_deriv(dx), m_threshold_chi(threshold_chi),
+          m_threshold_phi(threshold_phi), m_time(time), m_rebound_time{rebound_time}, m_threshold_chi_rebound(threshold_chi_rebound), m_threshold_phi_rebound(threshold_phi_rebound){};
 
     template <class data_t> void compute(Cell<data_t> current_cell) const
     {
@@ -52,17 +57,33 @@ class ChiAndPhiTaggingCriterion
       Tensor<1, data_t> d1_chi;
       FOR(idir) m_deriv.diff1(d1_chi, current_cell, idir, c_chi);
 
+        data_t pi = current_cell.load_vars(c_Pi);
+
         data_t mod_d1_chi = 0;
         data_t mod_d1_phi = 0;
+   
+
 
         FOR(idir)
         {
             mod_d1_phi += d1_phi[idir] * d1_phi[idir];
+            
             mod_d1_chi += d1_chi[idir] * d1_chi[idir];
         }
+        data_t criterion = 0.0;
+        if (m_time < m_rebound_time){
 
-        data_t criterion = m_dx * (sqrt(mod_d1_phi) / m_threshold_phi +
-                                   sqrt(mod_d1_chi) / m_threshold_chi);
+
+        criterion = m_dx * (sqrt(mod_d1_phi) / m_threshold_phi) + m_dt * (sqrt(pi*pi) / m_threshold_phi)
+                                + m_dx  * (sqrt(mod_d1_chi) / m_threshold_chi);
+        }
+
+        else{
+
+        criterion = m_dx * (sqrt(mod_d1_phi) / m_threshold_phi_rebound) + m_dt * (sqrt(pi*pi) / m_threshold_phi_rebound)
+          + m_dx  * (sqrt(mod_d1_chi) / m_threshold_chi_rebound);  
+
+        }
 
         // Write back into the flattened Chombo box
         current_cell.store_vars(criterion, 0);

@@ -11,7 +11,7 @@
 #include "SimulationParametersBase.hpp"
 
 // Problem specific includes:
-#include "Spheroid.hpp"
+#include "Ellipsoid.hpp"
 //#include "KerrBH.hpp"
 #include "Potential.hpp"
 #include "PhiAndKExtractionTaggingCriterion.hpp"
@@ -29,8 +29,8 @@ class SimulationParameters : public SimulationParametersBase
     void read_params(GRParmParse &pp)
     {
         // Initial scalar field data
-        initial_params.center =
-            center; // already read in SimulationParametersBase
+     //   initial_params.center =
+      //      center; // already read in SimulationParametersBase
         pp.load("G_Newton", G_Newton,
                 0.0); // for now the example neglects backreaction
       
@@ -38,9 +38,10 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("sf_eta", pot_params.eta, 0.0);
         pp.load("sf_lambda", pot_params.lambda, 0.0);
 
-        pp.load("R0", initial_params.a, 1.0);
-        pp.load("e", initial_params.e, 1.0);
-        
+        pp.load("a", initial_params.a, 1.0);
+        pp.load("b", initial_params.b, 1.0);
+        pp.load("c", initial_params.c, 1.0);
+        pp.load("center_SF", initial_params.centerSF, center);
 
         initial_params.eta = pot_params.eta;
         initial_params.lambda = pot_params.lambda;
@@ -48,10 +49,10 @@ class SimulationParameters : public SimulationParametersBase
        
 
         pp.load("thresh_phi", threshold_phi, 0.0);
-        pp.load("thresh_K", threshold_K, 0.0);
+        pp.load("thresh_chi", threshold_chi, 0.0);
         pp.load("r_limit", r_limit, 0.0);
 
-        pp.load("activate_extraction", activate_extraction, false);
+        // pp.load("activate_extraction", activate_extraction, false);
 
         #ifdef USE_AHFINDER
         pp.load("AH_initial_guess", AH_initial_guess, 0.5);
@@ -74,14 +75,14 @@ class SimulationParameters : public SimulationParametersBase
     // Initial data for matter and potential and BH
     double G_Newton;
     Potential::params_t pot_params;
-    Spheroid::params_t initial_params;
+    Ellipsoid::params_t initial_params;
     
     double threshold_phi;
-    double threshold_K; 
+    double threshold_chi; 
 
     double r_limit;
 
-    bool activate_extraction , calc_weyl, calculate_constraint_norms;
+    bool calc_weyl, calculate_constraint_norms; // activate_extraction , 
 
 
   //  PhiAndKTaggingCriterion::params_t tag_crit;

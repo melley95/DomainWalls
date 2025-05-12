@@ -13,7 +13,7 @@
 // Problem specific includes:
 #include "ArrayTools.hpp"
 #include "BoostedBH.hpp"
-#include "InitialScalarData_2D.hpp"
+#include "Spheroid.hpp"
 #include "Potential.hpp"
 
 
@@ -47,8 +47,8 @@ class SimulationParameters : public SimulationParametersBase
 
         // Initial data InitialScalarData_2D
         // pp.load("sf_phi0", init_SF_params.phi0, .1);
-        pp.load("R0", init_SF_params.b, 0.0);
-        pp.load("e", init_SF_params.e, 0.0);
+        pp.load("a", init_SF_params.a, 1.0);
+        pp.load("b", init_SF_params.b, 1.0);
         pp.load("lambda", potential_params.lambda, 0.0);
         pp.load("sf_eta", potential_params.eta, 0.0);
         pp.load("center_SF", init_SF_params.centerSF, center);
@@ -62,8 +62,12 @@ class SimulationParameters : public SimulationParametersBase
 
    //     pp.load("thresh_rho", threshold_rho, 0.0);
     //   pp.load("thresh_K", threshold_K, 0.0);
-       pp.load("thresh_chi", threshold_chi, 0.0);
+        pp.load("thresh_chi", threshold_chi, 0.0);
         pp.load("thresh_phi", threshold_phi, 0.0);
+
+   //     pp.load("rebound_time", rebound_time, 0.0);
+    //    pp.load("rebound_thresh_phi", threshold_phi_rebound, 0.0);
+     //   pp.load("rebound_thresh_chi", threshold_chi_rebound, 0.0);
       
 
 
@@ -92,16 +96,16 @@ class SimulationParameters : public SimulationParametersBase
             bh2_params.center[idir] = centerB[idir] + offsetB[idir];
         }
 
-        pp.load("excise", excise, false);
-        pp.load("r_excise", r_excise);
+   //     pp.load("excise", excise, false);
+    //    pp.load("r_excise", r_excise);
 
       
 
 
 
        
-       pp.load("ref_times", ref_times);
-       pp.load("ref_levels", ref_levels);
+    //   pp.load("ref_times", ref_times);
+     //  pp.load("ref_levels", ref_levels);
    //    pp.load("threshold_rho", threshold_rho);
        
 
@@ -132,8 +136,12 @@ class SimulationParameters : public SimulationParametersBase
     // For PhiAndK regridding
    // double threshold_rho;
   // double threshold_K;
-   double threshold_chi; 
+    double threshold_chi; 
     double threshold_phi;
+
+ //   double rebound_time;
+  //  double threshold_chi_rebound; 
+   // double threshold_phi_rebound;
 
 
 
@@ -141,7 +149,7 @@ class SimulationParameters : public SimulationParametersBase
     BoostedBH::params_t bh1_params;
     BoostedBH::params_t bh2_params;
 
-    InitialScalarData_2D::params_t init_SF_params;
+    Spheroid::params_t init_SF_params;
     Potential::params_t potential_params;
 
     extraction_params_t extraction_params_ADM;
@@ -156,8 +164,8 @@ class SimulationParameters : public SimulationParametersBase
     double r_excise;
 
 
-    std::array<double, 10> ref_times;
-    std::array<int, 10> ref_levels;
+   // std::array<double, 10> ref_times;
+   // std::array<int, 10> ref_levels;
 
    
   //  std::array<double, 10> ref_rho;

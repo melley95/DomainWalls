@@ -3,24 +3,24 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#if !defined(INITIALSCALARDATA_2D_HPP_)
-#error "This file should only be included through InitialScalarData_2D.hpp"
+#if !defined(SPHEROID_HPP_)
+#error "This file should only be included through Spheroid.hpp"
 #endif
 
-#ifndef INITIALSCALARDATA_2D_IMPL_HPP_
-#define INITIALSCALARDATA_2D_IMPL_HPP_
+#ifndef SPHEROID_IMPL_HPP_
+#define SPHEROID_IMPL_HPP_
 
 
 
 
-inline InitialScalarData_2D::InitialScalarData_2D(params_t a_init_SF_params, double a_dx)
+inline Spheroid::Spheroid(params_t a_init_SF_params, double a_dx)
         : m_init_SF_params(a_init_SF_params), m_dx(a_dx)
     {
     }
 
 // Compute the value of the initial vars on the grid
 template <class data_t>
-void InitialScalarData_2D::compute(Cell<data_t> current_cell) const
+void Spheroid::compute(Cell<data_t> current_cell) const
 {
     CCZ4CartoonVars::VarsWithGauge<data_t> vars;
     VarsTools::assign(vars,
@@ -43,8 +43,9 @@ void InitialScalarData_2D::compute(Cell<data_t> current_cell) const
 
     //R = m_init_SF_params.R0/sqrt(cos2phi+pow(m_init_SF_params.eps1, -2)*sin2phi);
 
+    data_t a = m_init_SF_params.a;
     data_t b = m_init_SF_params.b;
-    data_t a = b/sqrt(1.0 - pow(m_init_SF_params.e, 2.0));
+
 
     
 
@@ -85,4 +86,4 @@ void InitialScalarData_2D::compute(Cell<data_t> current_cell) const
     current_cell.store_vars(vars);
 }
 
-#endif /* INITIALSCALARDATA_2D_IMPL_HPP_ */
+#endif /* SPHEROID_IMPL_HPP_ */

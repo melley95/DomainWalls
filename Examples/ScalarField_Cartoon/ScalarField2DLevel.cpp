@@ -26,7 +26,7 @@
 
 // Initial data
 //#include "HeadOn2D.hpp"
-#include "InitialScalarData_2D.hpp"
+#include "Spheroid.hpp"
 //#include "IsotropicBoostedBH_bk.hpp"
 
 
@@ -59,8 +59,8 @@ void ScalarField2DLevel::initialData()
         pout() << "ScalarField2DLevel::initialData " << m_level << endl;
 
     
-    InitialScalarData_2D initialscalardata_2D(m_p.init_SF_params, m_dx);
-    BoxLoops::loop(make_compute_pack(SetValue(0.0), initialscalardata_2D),
+    Spheroid spheroid(m_p.init_SF_params, m_dx);
+    BoxLoops::loop(make_compute_pack(SetValue(0.0), spheroid),
                    m_state_new, m_state_new, INCLUDE_GHOST_CELLS,
                    disable_simd());
 

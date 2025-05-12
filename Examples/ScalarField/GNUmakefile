@@ -23,7 +23,8 @@ src_dirs := $(GRCHOMBO_SOURCE)/utils \
             $(GRCHOMBO_SOURCE)/AMRInterpolator  \
             $(GRCHOMBO_SOURCE)/ApparentHorizonFinder  \
             $(GRCHOMBO_SOURCE)/InitialConditions/BlackHoles \
+            $(GRCHOMBO_SOURCE)/InitialConditions/ScalarFields \
             $(GRCHOMBO_SOURCE)/BlackHoles \
-            $(PETSC_DIR)/include
-
+            $(PETSC_DIR)/$(PETSC_ARCH)/include \
+	        $(PETSC_DIR)/include
 include $(CHOMBO_HOME)/mk/Make.test

@@ -18,16 +18,16 @@
 #include "NewMatterConstraints.hpp"
 
 // For tag cells
-#include "PhiAndKExtractionTaggingCriterion.hpp"
+#include "ChiAndPhiTaggingCriterion.hpp"
 
 // Problem specific includes
 #include "ComputePack.hpp"
 #include "GammaCalculator.hpp"
-#include "Spheroid.hpp"
+#include "Ellipsoid.hpp"
 #include "Potential.hpp"
 #include "ScalarField.hpp"
 #include "SetValue.hpp"
-#include "Flat.hpp"
+
 
 #include "MatterEnergy.hpp"
 #include "FluxExtraction.hpp"
@@ -67,12 +67,10 @@ void ScalarFieldLevel::initialData()
     if (m_verbosity)
         pout() << "ScalarFieldLevel::initialData " << m_level << endl;
 
-    // First set everything to zero then initial conditions for scalar field -
-    // here a Kerr BH and a scalar field profile
+    Ellipsoid ellipsoid(m_p.initial_params, m_dx);
     BoxLoops::loop(
-        make_compute_pack(SetValue(0.), Flat(),
-                          Spheroid(m_p.initial_params, m_dx)),
-        m_state_new, m_state_new, INCLUDE_GHOST_CELLS);
+        make_compute_pack(SetValue(0.0), ellipsoid),
+        m_state_new, m_state_new, INCLUDE_GHOST_CELLS, disable_simd());
 
     fillAllGhosts();
     BoxLoops::loop(GammaCalculator(m_dx), m_state_new, m_state_new,
@@ -91,7 +89,7 @@ void ScalarFieldLevel::prePlotLevel()
             scalar_field, m_dx, m_p.G_Newton, c_Ham, Interval(c_Mom1, c_Mom3)),
         m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 
-    if (m_p.activate_extraction == 1 && m_p.calc_weyl == 1)
+    if (m_p.calc_weyl == 1)
     {
         BoxLoops::loop(
                 Constraints(m_dx, c_Ham, Interval(c_Mom1, c_Mom3)),
@@ -142,7 +140,7 @@ void ScalarFieldLevel::specificUpdateODE(GRLevelData &a_soln,
 void ScalarFieldLevel::preTagCells()
 {
     fillAllGhosts(VariableType::evolution, Interval(c_phi, c_phi));
-    fillAllGhosts(VariableType::evolution, Interval(c_K, c_K));
+    fillAllGhosts(VariableType::evolution, Interval(c_chi, c_chi));
 }
 
 void ScalarFieldLevel::computeTaggingCriterion(
@@ -150,7 +148,7 @@ void ScalarFieldLevel::computeTaggingCriterion(
     const FArrayBox &current_state_diagnostics)
 {
     BoxLoops::loop(
-        PhiAndKExtractionTaggingCriterion(m_dx, m_p.threshold_phi, m_p.threshold_K, m_p.r_limit, m_level, m_p.scalar_extraction_params, m_p.activate_extraction),
+        ChiAndPhiTaggingCriterion(m_dx, m_p.threshold_chi, m_p.threshold_phi),
         current_state, tagging_criterion);
 }
 void ScalarFieldLevel::specificPostTimeStep()
@@ -158,10 +156,9 @@ void ScalarFieldLevel::specificPostTimeStep()
 
      bool first_step = (m_time == 0.0);
 
-     if (m_p.activate_scalar_extraction == 1)
-    {
+     
     
-    int min_level = m_p.scalar_extraction_params.min_extraction_level();
+    int min_level = 0;
     bool fill_ghosts = false;
     bool calculate_min_level = at_level_timestep_multiple(min_level);
 
@@ -184,13 +181,13 @@ void ScalarFieldLevel::specificPostTimeStep()
     // Remove diagnostics of volume outside extraction regions -- TODO: multiple volumes
 
  
-    BoxLoops::loop(
+  /*  BoxLoops::loop(
         ExcisionDiagnostics(m_dx, m_p.center, 0.0, 
                             m_p.scalar_extraction_params.extraction_radii[0]), //m_p.extraction_params.extraction_radii.size() -1 - i
         m_state_diagnostics, m_state_diagnostics, SKIP_GHOST_CELLS,
         disable_simd());
 
-  
+  */
     if (m_level == min_level)
     {
   
@@ -203,7 +200,7 @@ void ScalarFieldLevel::specificPostTimeStep()
 
 
 
-    SmallDataIO integral_file("data/VolumeIntegrals_r"+std::to_string((int)m_p.scalar_extraction_params.extraction_radii[0]), m_dt, m_time,
+    SmallDataIO integral_file("data/VolumeIntegrals_r", m_dt, m_time,
                                   m_restart_time, SmallDataIO::APPEND,
                                   first_step);
     // remove any duplicate data if this is post restart
@@ -216,7 +213,8 @@ void ScalarFieldLevel::specificPostTimeStep()
         }
         integral_file.write_time_data_line(data_for_writing);
 
-
+        if (m_p.activate_scalar_extraction == 1)
+    {
   
     // Now refresh the interpolator and do the interpolation
       //  m_bh_amr.m_interpolator->refresh(fill_ghosts);
@@ -261,6 +259,7 @@ void ScalarFieldLevel::specificPostTimeStep()
             }
      }
     }
+}
 
         if (m_p.calculate_constraint_norms)
     {
@@ -282,7 +281,7 @@ void ScalarFieldLevel::specificPostTimeStep()
             }
             constraints_file.write_time_data_line({L2_Ham, L2_Mom});
         }
-    }
+    
 
     }
     

@@ -20,28 +20,31 @@ class PhiTaggingCriterion
 
     std::array<double, 10> m_ref_times;
     std::array<int, 10> m_ref_levels;
+
+    const double phi_thresh_low;
+    const double phi_thresh_high;
+
+    const double phi_thresh_low_2;
+    const double phi_thresh_high_2;
+
     
-    const FourthOrderDerivatives m_deriv;
-    const double m_threshold_chi;
-    const double m_threshold_K;
+    
+
+
 
 
 
   public:
-    PhiTaggingCriterion(const double dx, double time, int level, std::array<double, 10> ref_times, std::array<int, 10> ref_levels, const double threshold_chi, const double threshold_K)
+    PhiTaggingCriterion(const double dx, double time, int level, std::array<double, 10> ref_times, std::array<int, 10> ref_levels)
     : m_dx(dx), m_deriv(dx), m_time(time), m_level(level), m_ref_times(ref_times),
-      m_ref_levels(ref_levels), m_threshold_chi(threshold_chi), m_threshold_K(threshold_K) {};
+      m_ref_levels(ref_levels){};
 
     template <class data_t> void compute(Cell<data_t> current_cell) const
     {
         data_t phi = current_cell.load_vars(c_phi);
-        data_t chi = current_cell.load_vars(c_chi);
 
-        //Tensor<1, data_t> d1_chi;
-        //FOR(idir) m_deriv.diff1(d1_chi, current_cell, idir, c_chi);
 
-        //data_t mod_d1_chi = 0;
-        //FOR(idir) mod_d1_chi += d1_chi[idir] * d1_chi[idir];
+
         data_t criterion = 0.0;
         int size = 9;
         for (int i = 0; i < size; i++) {
@@ -49,19 +52,17 @@ class PhiTaggingCriterion
              
                     if(m_level < m_ref_levels[i]){
 
-                        auto crit1 = simd_compare_gt(phi, -0.012);
+                        auto crit1 = simd_compare_gt(phi, phi_thresh_low);
                         criterion = simd_conditional(crit1, 100.0, criterion);
-                        auto crit2 = simd_compare_lt(phi, 0.012);
-                        criterion = simd_conditional(crit2, criterion, 0.0);
+                        
+                        auto crit2 = simd_compare_lt(phi, phi_thresh_high);
+                        criterion = simd_conditional(crit2, criterion, 100.0);
 
-                        auto crit3 = simd_compare_lt(phi, -0.017);
+                        auto crit3 = simd_compare_lt(phi, phi_thresh_low_2);
                         criterion = simd_conditional(crit3, 100.0, criterion);
 
-                        auto crit4 = simd_compare_gt(phi, 0.017);
+                        auto crit4 = simd_compare_gt(phi, phi_thresh_high_2);
                         criterion = simd_conditional(crit4, 100.0, criterion);
-
-                        auto crit5 = simd_compare_lt(chi, m_threshold_chi);
-                        criterion = simd_conditional(crit5, 100.0, criterion);
                         
                     }
                 
@@ -69,16 +70,8 @@ class PhiTaggingCriterion
             }
         }
         
-      Tensor<1, data_t> d1_K;
-      FOR(idir) m_deriv.diff1(d1_K, current_cell, idir, c_K);
-      data_t mod_d1_K = 0;
-
-      FOR(idir)
-        {
-            mod_d1_K += d1_K[idir] * d1_K[idir];
-        }
-
-      criterion += m_dx * (sqrt(mod_d1_K) / m_threshold_K);
+      
+   
 
     /*  Tensor<1, data_t> d1_chi;
       FOR(idir) m_deriv.diff1(d1_chi, current_cell, idir, c_chi);

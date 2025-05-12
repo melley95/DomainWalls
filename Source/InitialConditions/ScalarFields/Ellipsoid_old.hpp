@@ -3,10 +3,11 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#ifndef INITIALSCALARDATA_2D_HPP_
-#define INITIALSCALARDATA_2D_HPP_
+#ifndef ELLIPSOID_HPP_
+#define ELLIPSOID_HPP_
 
-#include "CCZ4CartoonVars.hpp"
+#include "MatterCCZ4RHS.hpp"
+#include "ScalarField.hpp"
 #include "Cell.hpp"
 #include "Coordinates.hpp"
 #include "Tensor.hpp"
@@ -23,7 +24,7 @@
 
 //! Class which solves for the initial data for a spherically symmetric boson
 //! star with phi^4 coupling
-class InitialScalarData_2D
+class Ellipsoid
 {
 
   public:
@@ -31,14 +32,15 @@ class InitialScalarData_2D
     {
         double eta;
         double lambda;
+        double a;
         double b;
-        double e;
+        double c;
         std::array<double, CH_SPACEDIM>
             centerSF;
   
     };
     //! The constructor
-    InitialScalarData_2D(params_t a_init_SF_params, double a_dx);
+    Ellipsoid(params_t a_init_SF_params, double a_dx);
 
 
     //! Function to compute the value of all the initial vars on the grid
@@ -50,6 +52,6 @@ class InitialScalarData_2D
     double m_dx;
 };
 
-#include "InitialScalarData_2D.impl.hpp"
+#include "Ellipsoid.impl.hpp"
 
-#endif /* INITIALSCALARDATA_2D_HPP_ */
+#endif /* Ellipsoid_HPP_ */
