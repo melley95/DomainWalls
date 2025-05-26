@@ -10,15 +10,15 @@ verbosity = 0
 # output_path = "" # Main path for all files. Must exist!
 chk_prefix = DW_
 plot_prefix = DWp_
-restart_file = "hdf5/InitialDataFinal.3d.hdf5"
+# restart_file = "hdf5/DW_000125.2d.hdf5"
 
 # HDF5files are written every dt = L/N*dt_multiplier*checkpoint_interval
-checkpoint_interval = 100
+checkpoint_interval = 25
 # set to 0 to turn off plot files (except at t=0 and t=stop_time)
 # set to -1 to never ever print plotfiles
 plot_interval = 1
-num_plot_vars = 13
-plot_vars = phi chi K lapse Ham Mom1 Mom2 A12 A22 Aww h11 h12 hww
+num_plot_vars = 3
+plot_vars = phi Pi rho
 
 # subpaths - specific directories for hdf5, pout, extraction data
 # (these are created at runtime)
@@ -31,21 +31,20 @@ data_subpath = "data"
 print_progress_only_to_rank_0 = 1
 
 # ignore_checkpoint_name_mismatch = 0
-# write_plot_ghosts = 0
+write_plot_ghosts = 0
 
 #################################################
 # Initial Data parameters
 
 # Scalar field Initial data
-sf_eta = 0.01
-lambda = 2500.0
-R0 = 30.0
+sf_eta = 1.0
+lambda = 1.0
 
-eps1 = 1.25
-
+a = 80 
+b = 40
 model = 0
 
-G_Newton = 1.0
+G_Newton = 0.0
 
 #################################################
 # Grid parameters
@@ -59,35 +58,44 @@ G_Newton = 1.0
 # NB - the N values need to be multiples of the block_factor
 
 
-N1 = 256
-N2 = 256
+N1 = 32
+N2 = 32
 
-L = 64
+L = 128
 
 # Maximum number of times you can regrid above coarsest level
-max_level = 0 # There are (max_level+1) grids, so min is zero
+max_level = 8 # There are (max_level+1) grids, so min is zero
 
 # Frequency of regridding at each level and thresholds on the tagging
 # Need one for each level except the top one, ie max_level items
 # Generally you do not need to regrid frequently on every level
 # in this example turn off regridding on all levels
 # Level Regridding: 0   1   2   3   4   5
-regrid_interval   = 4 8 16 32 32
-regrid_threshold  = 0.5
+regrid_interval   = 4 8 16 16 16 16 16 16 16 16
+regrid_threshold  = 1.0
 
-thresh_phi = 0.08
-thresh_K = 1.0
 
 
 # Max and min box sizes
 max_box_size = 16
 min_box_size = 16
 
-#tag_buffer_size = 0 # this example uses a fixed grid
+thresh_chi = 100.0
+thresh_phi = 0.1
 
+rebound_time = 60.0
+
+rebound_thresh_chi = 100.0
+rebound_thresh_phi = 0.01
+
+# grid_buffer_size = 16 # this example uses a fixed grid
+tag_buffer_size = 8
 # center = 512.0 0.0 0.0 # defaults to center of the grid
 
 
+
+excise = 0
+r_excise = 15.0
 
 #################################################
 # Boundary Conditions parameters
@@ -98,45 +106,53 @@ isPeriodic = 0 0
 # 0 = static, 1 = sommerfeld, 2 = reflective
 # 3 = extrapolating, 4 = mixed
 # (see BoundaryConditions.hpp for details)
-hi_boundary = 1 1 
+hi_boundary = 1 1
 lo_boundary = 2 2
 
 # if reflective boundaries selected, must set
 # parity of all vars (in order given by UserVariables.hpp)
 # 0 = even
 # 1,2 = odd x,y
-# 3 = odd xy
-vars_parity            = 0 0 3 0 0   # chi, hij and hww
-                         0 0 3 0 0   # K and Aij
+# 4 = odd xy
+vars_parity            = 0 # chi
+                         0 4 0 0   # hij and hww
+                         0 0 4 0 0   # K and Aij
                          0 1 2       # Theta, Gamma
-                         0 1 2 0 0   # lapse shift and B
+                         0 1 2 1 2  # lapse shift and B
                          0 0         # phi and Pi
-vars_parity_diagnostic = 0 1 2 0      # Ham and Mom
-                         0 0         # Weyl ?? Need to fix
-                         0 0         # ADM M and P
-                         0 0 0 0 
+vars_parity_diagnostic = 0 1 2 0     # Ham and Mom
+                         0 4       # Weyl
+                         0          # rho
+                         1 2    # Sx Sy
+                         0 0     # rhoLL source
+                         0 4 0   # Sxx Sxy Syy 
+                         0      #Sww
+                         0     # det_gamma
+                         0
+                          
 		       
 			 
 # if sommerfeld boundaries selected, must select
 # asymptotic values
 num_nonzero_asymptotic_vars = 6
 nonzero_asymptotic_vars = chi h11 h22 hww lapse phi
-nonzero_asymptotic_values = 1.0 1.0 1.0 1.0 1.0 0.01
+nonzero_asymptotic_values = 1.0 1.0 1.0 1.0 1.0 1.0
 
 # if you are using extrapolating BC:
 extrapolation_order = 1
 
 # if mixed boundaries selected, must specify which are extrapolating
 # (the rest are assumed to be all sommerfeld)
-num_extrapolating_vars = 2
-extrapolating_vars = phi Pi
+#num_extrapolating_vars = 2
+#extrapolating_vars = phi Pi
+
 
 #################################################
 # Evolution parameters
 
 # dt will be dx*dt_multiplier on each grid level
 dt_multiplier = 0.2
-stop_time = 300.0
+stop_time = 200.0
 #max_steps = 10
 
 # Spatial derivative order (only affects CCZ4 RHS)
@@ -145,29 +161,79 @@ stop_time = 300.0
 
 nan_check = 1
 
+
 # Lapse evolution
-lapse_advec_coeff = 1.0
-lapse_coeff = 1.0
-lapse_power = 1.0
+lapse_advec_coeff = 0.0
+lapse_coeff = 0.0
+lapse_power = 0.0
 
 # Shift evolution
 shift_advec_coeff = 0.0 # Usually no advection for beta
-shift_Gamma_coeff = 0.75
-eta = 1.0 # eta of gamma driver, should be of order ~1/M_ADM of spacetime
+shift_Gamma_coeff = 0.0
+eta = 0.0 # eta of gamma driver, should be of order ~1/M_ADM of spacetime
 
 # CCZ4 parameters
 formulation = 1 # 1 for BSSN, 0 for CCZ4
-kappa1 = 0.1
+kappa1 = 0.01
 kappa2 = 0.
 kappa3 = 1.
 covariantZ4 = 1 # 0: keep kappa1; 1 [default]: replace kappa1 -> kappa1/lapse
 
 # coefficient for KO numerical dissipation
-sigma = 0.3
+sigma = 0.0
 
 calculate_constraint_norms = true
 
 # min_chi = 1.e-4
-# min_lapse = 1.e-4
+min_lapse = -0.1
+
+activate_extraction = 0
+num_extraction_radii = 1
+extraction_radii = 15.0 
+extraction_levels = 6
+#num_points_phi = 24
+#num_points_theta = 37
+
+#################################################
+
+
+# Apparent Horizon Finder parameters
+
+AH_activate = 0
+AH_num_ranks = 24
+AH_num_points_u = 195
+AH_num_points_v = 48
+AH_solve_interval = 1
+AH_print_interval = 1
+AH_track_center = false
+AH_predict_origin = false
+
+AH_stop_if_max_fails = 0
+AH_start_time = 70.0
+
+AH_num_extra_vars = 1
+AH_extra_vars = chi
+
+
+
+# AH_give_up_time = -1. # -1 to never
+AH_max_fails_after_lost = -1 # -1 to never
+# AH_print_geometry_data = 0
+AH_re_solve_at_restart = 1
+# AH_verbose = 1
+# AH_expansion_radius_power = 1.
+
+AH_initial_guess = 5.0
+
+# AH_look_for_chi_contour = 0.2
+
+AH_level_to_run = 0
+AH_allow_re_attempt = 1
+
+
+
+# AH_coords_subpath = "data/coords"
+# AH_stats_prefix = "stats_AH"
+# AH_coords_prefix = "coords_AH"
 
 #################################################
