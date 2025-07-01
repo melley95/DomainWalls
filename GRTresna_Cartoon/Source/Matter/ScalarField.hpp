@@ -52,6 +52,8 @@ class ScalarField
 
     Real my_Pi_function(const RealVect &loc) const;
 
+    Real get_root(Real r0, Real z0, Real z1, Real g) const;
+
     params_t m_matter_params;
 
     PsiAndAijFunctions *psi_and_Aij_functions;

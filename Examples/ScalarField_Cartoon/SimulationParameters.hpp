@@ -96,6 +96,30 @@ class SimulationParameters : public SimulationParametersBase
             bh2_params.center[idir] = centerB[idir] + offsetB[idir];
         }
 
+        pp.load("AH1_pos", AH1_pos, {0.0, 0.0});
+        pp.load("AH2_pos", AH2_pos, {0.0, 0.0});
+        pp.load("AH3_pos", AH3_pos, {0.0, 0.0});
+
+        pp.load("AH1_a", AH1_a, 1.0);
+        pp.load("AH1_b", AH1_b, 1.0);
+
+        pp.load("AH2_a", AH2_a, 1.0);
+        pp.load("AH2_b", AH2_b, 1.0);
+
+        pp.load("AH3_a", AH3_a, 1.0);
+        pp.load("AH3_b", AH3_b, 1.0);
+
+
+        pp.load("origin_x", origin_x, 0.0);
+        pp.load("origin_y", origin_y, 0.0);
+        pp.load("L", L, 0.0);
+
+        pp.load("max_ref_level", max_ref_level, 0);
+       
+       // pp.load("AH2_shape", AH2_shape, {0.0, 0.0});
+       // pp.load("AH3_shape", AH3_shape, {0.0, 0.0});
+
+
    //     pp.load("excise", excise, false);
     //    pp.load("r_excise", r_excise);
 
@@ -162,6 +186,33 @@ class SimulationParameters : public SimulationParametersBase
 
     bool excise;
     double r_excise;
+
+
+    std::array<double,CH_SPACEDIM> AH1_pos;
+    std::array<double,CH_SPACEDIM> AH2_pos;
+    std::array<double,CH_SPACEDIM> AH3_pos;
+
+    double AH1_a;
+    double AH1_b;
+
+    double AH2_a;
+    double AH2_b;
+
+    double AH3_a;
+    double AH3_b;
+
+
+    double origin_x;
+    double origin_y;
+
+    double L;
+
+    int max_ref_level;
+
+
+
+
+
 
 
    // std::array<double, 10> ref_times;

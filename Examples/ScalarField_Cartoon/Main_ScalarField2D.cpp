@@ -47,25 +47,25 @@
      if (sim_params.AH_activate)
  
      {
-         std::array<double,CH_SPACEDIM> cent0 = {23.5, 0.0};
-         AHSurfaceGeometry ellips0(cent0);
-         AHInitialGuessEllipsoid ellipsoid0(2.0, 1.0);
+         // std::array<double,CH_SPACEDIM> cent0 = {23.5, 0.0};
+         AHSurfaceGeometry ellips0(sim_params.AH1_pos);
+         AHInitialGuessEllipsoid ellipsoid0(sim_params.AH1_a, sim_params.AH1_b);
          bh_amr.m_ah_finder.add_ah(ellips0, ellipsoid0, sim_params.AH_params);
 
-         std::array<double,CH_SPACEDIM> cent1 = {23.0, 0.0};
-         AHSurfaceGeometry ellips1(cent1);
-         AHInitialGuessEllipsoid ellipsoid1(2.0, 1.0);
+    //     std::array<double,CH_SPACEDIM> cent1 = {23.0, 0.0};
+         AHSurfaceGeometry ellips1(sim_params.AH2_pos);
+         AHInitialGuessEllipsoid ellipsoid1(sim_params.AH2_a, sim_params.AH2_b);
          bh_amr.m_ah_finder.add_ah(ellips1, ellipsoid1, sim_params.AH_params);
 
-         std::array<double,CH_SPACEDIM> cent2 = {22.5, 0.0};
-         AHSurfaceGeometry ellips2(cent2);
-         AHInitialGuessEllipsoid ellipsoid2(2.0, 1.0);
+    //     std::array<double,CH_SPACEDIM> cent2 = {22.5, 0.0};
+         AHSurfaceGeometry ellips2(sim_params.AH3_pos);
+         AHInitialGuessEllipsoid ellipsoid2(sim_params.AH3_a, sim_params.AH3_b);
          bh_amr.m_ah_finder.add_ah(ellips2, ellipsoid2, sim_params.AH_params);
 
-         std::array<double,CH_SPACEDIM> cent3 = {22.0, 0.0};
-         AHSurfaceGeometry ellips3(cent3);
-         AHInitialGuessEllipsoid ellipsoid3(2.0, 1.0);
-         bh_amr.m_ah_finder.add_ah(ellips3, ellipsoid3, sim_params.AH_params);
+   //      std::array<double,CH_SPACEDIM> cent3 = {22.0, 0.0};
+     //    AHSurfaceGeometry ellips3(cent3);
+      //   AHInitialGuessEllipsoid ellipsoid3(2.0, 1.0);
+       //  bh_amr.m_ah_finder.add_ah(ellips3, ellipsoid3, sim_params.AH_params);
     
      }
  #endif
