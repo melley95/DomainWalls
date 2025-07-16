@@ -64,6 +64,7 @@ class SimulationParameters : public SimulationParametersBase
     //   pp.load("thresh_K", threshold_K, 0.0);
         pp.load("thresh_chi", threshold_chi, 0.0);
         pp.load("thresh_phi", threshold_phi, 0.0);
+        pp.load("thresh_K", threshold_K, 0.0);
 
    //     pp.load("rebound_time", rebound_time, 0.0);
     //    pp.load("rebound_thresh_phi", threshold_phi_rebound, 0.0);
@@ -110,12 +111,7 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("AH3_b", AH3_b, 1.0);
 
 
-        pp.load("origin_x", origin_x, 0.0);
-        pp.load("origin_y", origin_y, 0.0);
-        pp.load("L", L, 0.0);
-
-        pp.load("max_ref_level", max_ref_level, 0);
-       
+      
        // pp.load("AH2_shape", AH2_shape, {0.0, 0.0});
        // pp.load("AH3_shape", AH3_shape, {0.0, 0.0});
 
@@ -162,6 +158,7 @@ class SimulationParameters : public SimulationParametersBase
   // double threshold_K;
     double threshold_chi; 
     double threshold_phi;
+    double threshold_K;
 
  //   double rebound_time;
   //  double threshold_chi_rebound; 
@@ -202,12 +199,6 @@ class SimulationParameters : public SimulationParametersBase
     double AH3_b;
 
 
-    double origin_x;
-    double origin_y;
-
-    double L;
-
-    int max_ref_level;
 
 
 

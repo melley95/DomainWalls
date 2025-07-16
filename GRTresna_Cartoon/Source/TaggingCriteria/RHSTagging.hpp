@@ -71,6 +71,8 @@ void RHSTagging<method_t, matter_t>::set_regrid_condition(
             
             Real psi_0 = psi_reg;
 
+           
+
             Tensor<1, Real, SpaceDim> d1_psi_reg;
             derivs.get_d1(d1_psi_reg, iv, multigrid_vars_box, c_psi_reg);
 
@@ -101,6 +103,22 @@ void RHSTagging<method_t, matter_t>::set_regrid_condition(
             const auto emtensor =
                 matter->compute_emtensor(iv, a_dx, multigrid_vars_box);
 
+
+            
+           
+
+            Tensor<1, Real, SpaceDim> d1_phi;
+            Real mod_d1_phi;
+            derivs.get_d1(d1_phi, iv, multigrid_vars_box, c_phi_0);
+
+            FOR(idir)
+        {
+            mod_d1_phi += d1_phi[idir] * d1_phi[idir];
+          
+        }
+
+
+
             if (regrid_x > 0 && regrid_y > 0)
             {
              //   Real rr = sqrt(loc[0] * loc[0] +loc[1] * loc[1]);
@@ -113,7 +131,9 @@ void RHSTagging<method_t, matter_t>::set_regrid_condition(
             {
                 // the condition is similar to the rhs but we take abs
                 // value of the contributions and add in effect of psi_0 via log
-                condition_box(iv, 0) =
+                condition_box(iv, 0) =             //a_dx[0] * (sqrt(mod_d1_phi));
+
+
                     2.0 * M_PI * G_Newton * emtensor.rho + abs(0.125 * A2_0) +
                     log(psi_0) + laplacian_psi_reg +
                     8.0 * M_PI * G_Newton *
