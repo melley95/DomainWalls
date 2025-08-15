@@ -20,7 +20,7 @@ class PositiveChiAndAlpha
   public:
     //! Constructor for class
     PositiveChiAndAlpha(const double a_min_chi = 1e-4,
-                        const double a_min_lapse = 1e-4)
+                        const double a_min_lapse = -0.1)
         : m_min_chi(a_min_chi), m_min_lapse(a_min_lapse)
     {
     }

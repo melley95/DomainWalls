@@ -131,14 +131,14 @@ void RHSTagging<method_t, matter_t>::set_regrid_condition(
             {
                 // the condition is similar to the rhs but we take abs
                 // value of the contributions and add in effect of psi_0 via log
-                condition_box(iv, 0) =             //a_dx[0] * (sqrt(mod_d1_phi));
+                condition_box(iv, 0) = sqrt(mod_d1_phi); //* a_dx[0]; 
 
 
-                    2.0 * M_PI * G_Newton * emtensor.rho + abs(0.125 * A2_0) +
-                    log(psi_0) + laplacian_psi_reg +
-                    8.0 * M_PI * G_Newton *
-                        (abs(emtensor.Si[0]) + abs(emtensor.Si[1]))  
-                    + d1_psi_reg[cartoon_idx] / yy;
+                 //   2.0 * M_PI * G_Newton * emtensor.rho + abs(0.125 * A2_0) +
+                  //  log(psi_0) + laplacian_psi_reg +
+                  //  8.0 * M_PI * G_Newton *
+                   //     (abs(emtensor.Si[0]) + abs(emtensor.Si[1]))  
+                   // + d1_psi_reg[cartoon_idx] / yy;
             }
         }
     }
