@@ -3,8 +3,8 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#ifndef CHIPHIKTAGGINGCRITERION_HPP_
-#define CHIPHIKTAGGINGCRITERION_HPP_
+#ifndef CHIPHIHAMTAGGINGCRITERION_HPP_
+#define CHIPHIHAMTAGGINGCRITERION_HPP_
 
 #include "Cell.hpp"
  // #include "Coordinates.hpp"
@@ -13,16 +13,14 @@
 // #include "ScalarField.hpp"
 #include "Tensor.hpp"
 
-class ChiPhiKTaggingCriterion
+class ChiPhiHamTaggingCriterion
 {
   protected:
     const double m_dx;
     const FourthOrderDerivatives m_deriv;
     const double m_threshold_chi;
     const double m_threshold_phi;
-    const double m_threshold_K;
-    const double m_Lmax;
-    std::array<double, CH_SPACEDIM> m_center;
+    const double m_threshold_ham;
 
    // template <class data_t>
    // using MatterVars = typename ScalarField<>::template Vars<data_t>;
@@ -42,10 +40,10 @@ class ChiPhiKTaggingCriterion
     };
 */
   public:
-    ChiPhiKTaggingCriterion(const double dx, const double threshold_chi,
-                              const double threshold_phi, const double threshold_K, const double Lmax, std::array<double, CH_SPACEDIM> center)
+    ChiPhiHamTaggingCriterion(const double dx, const double threshold_chi,
+                              const double threshold_phi, const double threshold_ham)
         : m_dx(dx), m_deriv(dx), m_threshold_chi(threshold_chi),
-          m_threshold_phi(threshold_phi), m_threshold_K(threshold_K), m_Lmax(Lmax), m_center(center){};
+          m_threshold_phi(threshold_phi), m_threshold_ham(threshold_ham){};
 
     template <class data_t> void compute(Cell<data_t> current_cell) const
     {
@@ -55,43 +53,26 @@ class ChiPhiKTaggingCriterion
       Tensor<1, data_t> d1_chi;
       FOR(idir) m_deriv.diff1(d1_chi, current_cell, idir, c_chi);
 
-      Tensor<1, data_t> d1_K;
-      FOR(idir) m_deriv.diff1(d1_K, current_cell, idir, c_K);
+      
+
+        data_t Ham;
+
+        Ham = c_Ham;
 
         data_t mod_d1_chi = 0;
         data_t mod_d1_phi = 0;
-        data_t mod_d1_K = 0;
-
-        const Coordinates<double> coords(current_cell, m_dx, m_center);
-
-        data_t x = coords.x;
-        double y = coords.y;
-
-        data_t dist = sqrt(pow(x, 2.0) + pow(y, 2.0));
-
-        auto regrid =simd_compare_gt(
-          dist, m_Lmax);
         
-        
-        
-        
-
-       
 
         FOR(idir)
         {
             mod_d1_phi += d1_phi[idir] * d1_phi[idir];
             mod_d1_chi += d1_chi[idir] * d1_chi[idir];
-            mod_d1_K += d1_K[idir] * d1_K[idir];
         }
 
         data_t criterion = m_dx * (sqrt(mod_d1_phi) / m_threshold_phi +
                                    sqrt(mod_d1_chi) / m_threshold_chi +
-                                   sqrt(mod_d1_K) / m_threshold_K);
+                                   sqrt(abs(Ham)) / m_threshold_ham);
 
-
-                            
-        criterion = simd_conditional(regrid, 0.0, criterion);
         // Write back into the flattened Chombo box
         current_cell.store_vars(criterion, 0);
 
@@ -99,4 +80,4 @@ class ChiPhiKTaggingCriterion
     }
 };
 
-#endif /* CHIPHIKTAGGINGCRITERION_HPP_ */
+#endif /* CHIPHIHAMTAGGINGCRITERION_HPP_ */

@@ -65,6 +65,7 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("thresh_chi", threshold_chi, 0.0);
         pp.load("thresh_phi", threshold_phi, 0.0);
         pp.load("thresh_K", threshold_K, 0.0);
+        pp.load("Lmax", Lmax, 100.0);
 
    //     pp.load("rebound_time", rebound_time, 0.0);
     //    pp.load("rebound_thresh_phi", threshold_phi_rebound, 0.0);
@@ -159,6 +160,7 @@ class SimulationParameters : public SimulationParametersBase
     double threshold_chi; 
     double threshold_phi;
     double threshold_K;
+    double Lmax;
 
  //   double rebound_time;
   //  double threshold_chi_rebound; 

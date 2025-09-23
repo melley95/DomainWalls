@@ -48,7 +48,7 @@ void ScalarField2DLevel::specificAdvance()
     // Check for nan's
     if (m_p.nan_check)
         BoxLoops::loop(
-            NanCheck(m_dx, m_p.center, "NaNCheck in specific Advance: "),
+            NanCheck(m_dx,  "NaNCheck in specific Advance: "),
             m_state_new, m_state_new, EXCLUDE_GHOST_CELLS, disable_simd());
 }
 
@@ -125,7 +125,7 @@ void ScalarField2DLevel::computeTaggingCriterion(FArrayBox &tagging_criterion,
      //   PhiTaggingCriterion(m_dx, m_time, m_level, m_p.ref_times, m_p.ref_levels, m_p.threshold_chi, m_p.threshold_K),
       //  current_state, tagging_criterion);
         BoxLoops::loop(
-        ChiPhiKTaggingCriterion(m_dx, m_p.threshold_chi, m_p.threshold_phi, m_p.threshold_K),
+        ChiPhiKTaggingCriterion(m_dx, m_p.threshold_chi, m_p.threshold_phi, m_p.threshold_K, m_p.Lmax, m_p.center),
         current_state, tagging_criterion);
   //  BoxLoops::loop(
     //    PhiAndKExtractionTaggingCriterion(m_dx, m_p.threshold_phi, m_p.threshold_K, m_level, m_p.extraction_params, m_p.activate_extraction),
