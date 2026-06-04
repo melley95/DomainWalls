@@ -32,7 +32,7 @@ class MovingPunctureGaugeSA
                           const vars_t<data_t> &advec) const
     {
         rhs.lapse = m_params.lapse_advec_coeff * advec.lapse -
-                        (vars.lapse * vars.lapse + m_params.lapse_coeff) *
+                        (m_params.SA_lapse_coeff_1*vars.lapse * vars.lapse + m_params.SA_lapse_coeff_2) *
                         (vars.K - 2 * vars.Theta);
         FOR(i)
         {

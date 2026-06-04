@@ -27,6 +27,9 @@ void PsiAndAijFunctions::read_params(GRParmParse &pp,
     pp.getarr("bh2_offset", temp_offset2, 0, SpaceDim);
     pp.getarr("bh1_momentum", temp_mom1, 0, SpaceDim);
     pp.getarr("bh2_momentum", temp_mom2, 0, SpaceDim);
+    pp.get("eta", a_psi_and_Aij_params.eta);
+    pp.get("lambda", a_psi_and_Aij_params.lambda);
+    pp.get("a", a_psi_and_Aij_params.a);
     for (int idir = 0; idir < SpaceDim; idir++)
     {
         a_psi_and_Aij_params.bh1_spin[idir] = temp_spin1[idir];
@@ -270,5 +273,29 @@ void PsiAndAijFunctions::set_Aww_reg(Real &Aww, const FArrayBox &multigrid_vars_
 
     }
 
+}
+
+Real PsiAndAijFunctions::compute_domainwall_psi(const RealVect &loc, const RealVect &a_dx)
+{
+    
+    Real radius_squared = 0.0;   // Need to offset by centre 
+    FOR(i) { radius_squared += a_dx[i]*a_dx[i]*loc[i] * loc[i]; }
+    Real radius = sqrt(radius_squared);
+
+    Real tension = 2.0 * sqrt(2.0 * m_psi_and_Aij_params.lambda) * pow(m_psi_and_Aij_params.eta, 3.0)/3.0; 
+    Real mass = 4.0 * M_PI * pow(m_psi_and_Aij_params.a, 2.0) * tension; 
+
+    Real psi = 0;
+    if (radius > m_psi_and_Aij_params.a){
+        psi = 1.0 + mass/(2.0*radius);
+    }
+
+    else{
+        psi = 1.0 + mass/(2.0* m_psi_and_Aij_params.a);
+    }
+    
+
+
+    return psi;
 }
 

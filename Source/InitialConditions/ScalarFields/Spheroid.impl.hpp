@@ -73,31 +73,51 @@ template <class data_t>
 data_t Spheroid::get_root(data_t r0, data_t z0, data_t z1, data_t g) const
 {
     data_t n0 = r0*z0;
-    data_t s0 = z1 - 1;
-    data_t s1 = -1 + sqrt(r0*r0*z0*z0 + z1*z1);
-    data_t s = 0;
-    data_t max_iterations = 1000; // std::numeric_limits<Real>::digits - std::numeric_limits<Real>::min exponent; // ME: change??
+    data_t s0, s1;
+    data_t eps = 1e-12;
 
-    for (int i =0; i < max_iterations; i++){
-        s = (s0 + s1) / 2.0;
-        if (s == s0 || s == s1) {
-            break;
-        }
-        data_t ratio0 = n0/(s + r0);
-        data_t ratio1 = z1/(s+1);
-        g = ratio0*ratio0 + ratio1*ratio1 -1.0;
-        if (g > 0){
-            s0 = s;
-        }
-        else if(g < 0)
-        {
-            s1 = s;
-        }
-        else{
-            break;
-        }
-
+    if (g < 0) // inside ellipse
+    {
+        s0 = -r0 + eps;
+        s1 = 0.0;
     }
+    else // outside ellipse
+    {
+        s0 = 0.0;
+        s1 = 1.0;
+
+        // grow upper bound until root is bracketed
+        while (true)
+        {
+            data_t ratio0 = n0/(s1 + r0);
+            data_t ratio1 = z1/(s1 + 1.0);
+            data_t g1 = ratio0*ratio0 + ratio1*ratio1 - 1.0;
+
+            if (g1 < 0.0) break;
+            s1 *= 2.0;
+        }
+    }
+
+    data_t s = 0;
+    int max_iterations = 1000;
+
+    for (int i = 0; i < max_iterations; i++)
+    {
+        s = 0.5*(s0 + s1);
+        if (s == s0 || s == s1) break;
+
+        data_t ratio0 = n0/(s + r0);
+        data_t ratio1 = z1/(s + 1.0);
+        data_t gs = ratio0*ratio0 + ratio1*ratio1 - 1.0;
+
+        if (gs > 0.0)
+            s0 = s;
+        else if (gs < 0.0)
+            s1 = s;
+        else
+            break;
+    }
+
     return s;
 }
 

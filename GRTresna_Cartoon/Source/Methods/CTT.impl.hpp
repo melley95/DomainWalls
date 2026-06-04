@@ -18,6 +18,10 @@ template <typename matter_t> struct CTT<matter_t>::params_t
     bool use_compact_Vi_ansatz;
     Real regularised_part_psi;
     bool deactivate_zero_mode;
+    Real lambda;
+    Real eta;
+    Real a;
+    Real b;
 };
 
 template <typename matter_t>
@@ -42,6 +46,11 @@ void CTT<matter_t>::read_params(GRParmParse &pp,
     pp.load("regularised_part_psi", a_method_params.regularised_part_psi, 1.0);
     pp.load("deactivate_zero_mode", a_method_params.deactivate_zero_mode,
             false);
+    pp.load("eta", a_method_params.eta);
+    pp.load("lambda", a_method_params.lambda);
+    pp.load("a", a_method_params.a);
+    pp.load("b", a_method_params.b);
+    
 }
 
 template <typename matter_t>
@@ -70,8 +79,8 @@ void CTT<matter_t>::solve_analytic(
 
             // Calculate the actual value of psi including BH part
             Real psi_reg = multigrid_vars_box(iv, c_psi_reg);
-           // Real psi_bh = psi_and_Aij_functions->compute_bowenyork_psi(loc);
-            Real psi_0 = psi_reg;
+            Real psi_dw = psi_and_Aij_functions->compute_domainwall_psi(loc, a_dx);
+            Real psi_0 = psi_reg;  // + psi_dw;
             Real laplacian_psi_reg;
             derivs.scalar_Laplacian(laplacian_psi_reg, iv, multigrid_vars_box,
                                     c_psi_reg);
@@ -143,8 +152,8 @@ void CTT<matter_t>::set_elliptic_terms(
 
             // Calculate the actual value of psi including BH part
             Real psi_reg = multigrid_vars_box(iv, c_psi_reg);
-          //  Real psi_bh = psi_and_Aij_functions->compute_bowenyork_psi(loc);
-            Real psi_0 = psi_reg;
+            Real psi_dw = psi_and_Aij_functions->compute_domainwall_psi(loc, a_dx);
+            Real psi_0 = psi_reg;  //+ psi_dw;
             Real laplacian_psi_reg;
             derivs.scalar_Laplacian(laplacian_psi_reg, iv, multigrid_vars_box,
                                     c_psi_reg);
@@ -160,7 +169,7 @@ void CTT<matter_t>::set_elliptic_terms(
 
             // rhs terms, K is set to cancel matter terms only
             rhs_box(iv, c_psi) =
-            - 2.0 * M_PI * G_Newton * emtensor.rho * pow(psi_reg, 5.0) - laplacian_psi_reg -d1_psi_reg[1]/yy;
+            - 2.0 * M_PI * G_Newton * emtensor.rho * pow(psi_0, 5.0) - laplacian_psi_reg -d1_psi_reg[1]/yy;
 
 
          
@@ -205,12 +214,40 @@ void CTT<matter_t>::initialise_method_vars(
             RealVect loc;
             Grids::get_loc(loc, iv, a_dx, center);
 
+            Real a = m_method_params.a;
+            Real b = m_method_params.b;
+
+            Real radius_squared = 0.0;   // Need to offset by centre 
+            FOR(i) { radius_squared += loc[i] * loc[i]; }
+            Real radius = sqrt(radius_squared);
+
+            Real cos_theta = loc[0]/radius;
+            Real sin_theta = loc[1]/radius;
+
+        //    Real r_ellipse = 1.0/sqrt(pow(cos_theta/m_method_params.a, 2.0) + pow(sin_theta/m_method_params.b, 2.0));
+
+
+            Real tension = 2.0 * sqrt(2.0 * m_method_params.lambda) * pow(m_method_params.eta, 3.0)/3.0; 
+            Real SA = 2.0 * M_PI * pow(b, 2.0) + 2.0 * M_PI * a * a * b * std::asin(sqrt(a*a - b*b)/a)/sqrt(a*a - b*b);
+            Real mass = SA * tension; 
+         //   std::cout << mass << std::endl;
+           // mass = 2.569822791;
+
+            Real psi = 0;
+            if (radius > a){
+            psi = 1.0 + mass/(2.0*radius);
+            }
+
+            else{
+            psi = 1.0 + mass/(2.0* a);
+            }
+            // m_psi_and_Aij_params.a
             // note that we don't include the singular part of psi
             // for the BHs - this is added at the output data stage
             // and when we calculate psi_reg in the rhs etc
             // as it already satisfies Laplacian(psi) = 0
-            multigrid_vars_box(iv, c_psi_reg) =
-                m_method_params.regularised_part_psi;
+            multigrid_vars_box(iv, c_psi_reg) = psi;
+           // std::cout << mass << std::endl;
         }
     }
 }

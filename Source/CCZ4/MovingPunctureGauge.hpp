@@ -32,6 +32,9 @@ class MovingPunctureGauge
 
         double exp_lapse_coeff = 0.0;
 
+        double SA_lapse_coeff_1 = 0.0;
+        double SA_lapse_coeff_2 = 0.0;
+
         // shift params:
         double shift_Gamma_coeff = 0.75; //!< Gives the F in \f$\partial_t
                                          //!  \beta^i =  F B^i\f$

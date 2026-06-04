@@ -20,8 +20,6 @@ enum
     c_Weyl4_Re,
     c_Weyl4_Im,
 
-   // c_Madm,
-  //  c_Padm,
 
     c_rho,
 
@@ -39,9 +37,18 @@ enum
 
     c_det_gamma,
 
-    c_criterion,
 
-    // c_S,
+    c_tr_A2,
+
+    c_ricci_scalar,
+
+    c_Madm,
+
+   
+
+    c_Px_adm,
+    c_Py_adm,
+    c_Pz_adm,
 
     // c_Sxx_TF,
     // c_Sxy_TF,
@@ -72,7 +79,14 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
 
      "det_gamma",
 
-     "criterion"
+
+     "tr_A2",
+
+     "ricci_scalar",
+
+     "M_adm", 
+
+     "Px_adm", "Py_adm", "Pz_adm"
     
     
     };     

@@ -39,6 +39,9 @@ class SimulationParametersBase : public ChomboParameters
         pp.load("lapse_power", ccz4_params.lapse_power, 1.0);
         pp.load("exp_lapse_coeff", ccz4_params.exp_lapse_coeff, 0.0);
 
+        pp.load("SA_lapse_coeff_1", ccz4_params.SA_lapse_coeff_1, 1.0);
+        pp.load("SA_lapse_coeff_2", ccz4_params.SA_lapse_coeff_2, 1.0);
+
         // Shift Evolution
         pp.load("shift_advec_coeff", ccz4_params.shift_advec_coeff, 0.0);
         pp.load("shift_Gamma_coeff", ccz4_params.shift_Gamma_coeff, 0.75);

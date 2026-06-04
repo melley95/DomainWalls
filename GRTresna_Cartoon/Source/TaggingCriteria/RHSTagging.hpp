@@ -113,33 +113,33 @@ void RHSTagging<method_t, matter_t>::set_regrid_condition(
 
             FOR(idir)
         {
-            mod_d1_phi += d1_phi[idir] * d1_phi[idir];
+            mod_d1_phi += d1_phi[idir] * d1_phi[idir] * a_dx[idir] * a_dx[idir];
           
         }
 
 
 
-            if (regrid_x > 0 && regrid_y > 0)
-            {
+       //     if (regrid_x > 0 && regrid_y > 0)
+         ///   {
              //   Real rr = sqrt(loc[0] * loc[0] +loc[1] * loc[1]);
-                if (loc[0] < regrid_x && loc[1] < regrid_y)
-                {
-                    condition_box(iv, 0) = 1.0;
-                }
-            }
-            else
-            {
+            //    if (loc[0] < regrid_x && loc[1] < regrid_y)
+             //   {
+               //     condition_box(iv, 0) = 1.0;
+              //  }
+          //  }
+          //  else
+          //  {
                 // the condition is similar to the rhs but we take abs
                 // value of the contributions and add in effect of psi_0 via log
-                condition_box(iv, 0) = sqrt(mod_d1_phi); //* a_dx[0]; 
+                condition_box(iv, 0) =  mod_d1_phi;                      // sqrt(mod_d1_phi); //* a_dx[0]; 
 
 
-                 //   2.0 * M_PI * G_Newton * emtensor.rho + abs(0.125 * A2_0) +
-                  //  log(psi_0) + laplacian_psi_reg +
-                  //  8.0 * M_PI * G_Newton *
-                   //     (abs(emtensor.Si[0]) + abs(emtensor.Si[1]))  
-                   // + d1_psi_reg[cartoon_idx] / yy;
-            }
+                    2.0 * M_PI * G_Newton * emtensor.rho + abs(0.125 * A2_0) +
+                    log(psi_0) + laplacian_psi_reg +
+                    8.0 * M_PI * G_Newton *
+                        (abs(emtensor.Si[0]) + abs(emtensor.Si[1]))  
+                    + d1_psi_reg[cartoon_idx] / yy;
+           // }
         }
     }
 }

@@ -11,7 +11,7 @@
 #include "CCZ4Cartoon.hpp"
 #include "ComputePack.hpp"
 #include "ConstraintsCartoon.hpp"
-#include "MovingPunctureGaugeSA.hpp"
+#include "MovingPunctureGauge.hpp"
 #include "NanCheck.hpp"
 #include "PositiveChiAndAlpha.hpp"
 #include "SetValue.hpp"
@@ -95,7 +95,7 @@ void ScalarField2DLevel::specificEvalRHS(GRLevelData &a_soln,
     // Calculate CCZ4 right hand side
     Potential potential(m_p.potential_params);
     BoxLoops::loop(
-        CCZ4Cartoon<MovingPunctureGaugeSA, FourthOrderDerivatives, Potential>(
+        CCZ4Cartoon<MovingPunctureGauge, FourthOrderDerivatives, Potential>(
             m_p.ccz4_params, m_dx, m_p.sigma, potential, m_p.m_G_Newton,
             m_p.formulation),
         a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
@@ -154,7 +154,7 @@ void ScalarField2DLevel::specificPostTimeStep()
      //   MovingPunctureGauge gauge(m_p.ccz4_params);
         BoxLoops::loop(Constraints<Potential>(m_dx, potential, m_p.m_G_Newton),
         m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
-        BoxLoops::loop(MatterEnergy_2<Potential, MovingPunctureGaugeSA>(m_p.ccz4_params, potential, m_dx, m_p.center),
+        BoxLoops::loop(MatterEnergy_2<Potential, MovingPunctureGauge>(m_p.ccz4_params, potential, m_dx, m_p.center),
                        m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 
   
@@ -225,36 +225,38 @@ void ScalarField2DLevel::specificPostTimeStep()
         if (m_p.AH_activate && m_level == m_p.AH_params.level_to_run)
             m_bh_amr.m_ah_finder.solve(m_dt, m_time, m_restart_time);
         #endif
-    }
+    
     
     
    
 
- /*  if (m_p.activate_extraction == 1)
-    {
-        int weyl_min_level = m_p.extraction_params.min_extraction_level();
-        bool calculate_weyl = at_level_timestep_multiple(weyl_min_level);
+ // Do the extraction on the min extraction level
+ if (m_p.activate_extraction == 1)
+ {
+     int min_level = m_p.extraction_params.min_extraction_level();
+     bool calculate_adm = at_level_timestep_multiple(min_level);
+     if (calculate_adm)
+     {
+         // Populate the ADM Mass and Spin values on the grid
+         fillAllGhosts();
+         BoxLoops::loop(
+             ADMQuantities(m_p.extraction_params.center, m_dx, c_Madm,
+                           Interval(c_Px_adm, c_Pz_adm)),
+             m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 
-        if (calculate_weyl)
-        {
-            // Populate the Weyl Scalar values on the grid
-            fillAllGhosts();
+         if (m_level == min_level)
+         {
+             CH_TIME("ADMExtraction");
+             // Now refresh the interpolator and do the interpolation
+             m_gr_amr.m_interpolator->refresh();
+             ADMQuantitiesExtraction my_extraction(
+                 m_p.extraction_params, m_dt, m_time, m_restart_time, c_Madm,
+                 Interval(c_Px_adm, c_Pz_adm));
+             my_extraction.execute_query(m_gr_amr.m_interpolator);
+         }
+     }
+ }
 
-            BoxLoops::loop(WeylOmScalar(m_p.extraction_params.center, m_dx),
-                           m_state_new, m_state_diagnostics,
-                           EXCLUDE_GHOST_CELLS);
+}
 
-            // Do the extraction on the min extraction level
-            if (m_level == weyl_min_level)
-            {
-                CH_TIME("WeylExtraction");
-                // Now refresh the interpolator and do the interpolation
-                m_bh_amr.m_interpolator->refresh();
-                WeylExtraction weyl_extraction(m_p.extraction_params, m_dt,
-                                               m_time, first_step,
-                                               m_restart_time);
-                weyl_extraction.execute_query(m_bh_amr.m_interpolator);
-            }
-        }
-*/
 

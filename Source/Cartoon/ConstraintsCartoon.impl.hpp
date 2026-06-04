@@ -59,6 +59,9 @@ void Constraints<potential_t>::compute(Cell<data_t> current_cell) const
     current_cell.store_vars(out.Sij[1][1], c_Syy);
     current_cell.store_vars(out.Sww, c_Sww);
     current_cell.store_vars(out.det_gamma, c_det_gamma);
+    current_cell.store_vars(out.tr_A2, c_tr_A2);
+    current_cell.store_vars(out.ricci_scalar, c_ricci_scalar);
+
     // current_cell.store_vars(out.S, c_S);
 
     // current_cell.store_vars(out.Sij_TF[0][0], c_Sxx_TF);
@@ -116,6 +119,10 @@ Constraints<potential_t>::constraint_equations(
     out.Ham = ricci.scalar +
               (GR_SPACEDIM - 1.) * vars.K * vars.K / GR_SPACEDIM - tr_A2;
     out.Ham -= 2 * m_cosmological_constant;
+
+    out.tr_A2 = tr_A2;
+
+    out.ricci_scalar = ricci.scalar;
 
     Tensor<2, data_t> covd_A[CH_SPACEDIM];
     FOR(i, j, k)

@@ -29,6 +29,10 @@ class PsiAndAijFunctions
         RealVect bh1_offset;
         RealVect bh2_offset;
         bool use_compact_Vi_ansatz;
+
+        Real lambda;
+        Real eta;
+        Real a;
     };
 
     static void read_params(GRParmParse &pp, params_t &a_psi_and_Aij_params);
@@ -52,6 +56,8 @@ class PsiAndAijFunctions
 
     void set_Aww_reg(Real &Aww, const FArrayBox &multigrid_vars_box,
                     const IntVect &iv, const RealVect &a_dx, const RealVect &loc);
+
+    Real compute_domainwall_psi(const RealVect &loc, const RealVect &a_dx);
 
     params_t m_psi_and_Aij_params;
 };
